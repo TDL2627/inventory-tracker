@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "Inventory App",
   description: "Created by TDL2627",
+  icons: {
+    icon: "/inventory.png",
+  },
 };
 
 export default function RootLayout({ children }) {
