@@ -3,13 +3,14 @@ import { supabase } from "../app/lib/supabaseClient";
 
 const ProductPage = () => {
   const [products, setProducts] = useState([]);
-  const [activeModal, setActiveModal] = useState(""); // "add", "edit", "delete", or "" (closed)
+  const [activeModal, setActiveModal] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [productForm, setProductForm] = useState({
     name: "",
     category: "",
     price: "",
-    quantity: ""
+    quantity: "",
+    imageFile: null,
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -29,32 +30,56 @@ const ProductPage = () => {
     setIsLoading(false);
   };
 
-  const handleAddProduct = async (e) => {
-    e.preventDefault();
-    
-    const {error } = await supabase
-      .from("products")
-      .insert([
-        {
-          name: productForm.name,
-          category: productForm.category,
-          price: parseFloat(productForm.price),
-          quantity: parseInt(productForm.quantity)
-        }
-      ]);
+const handleAddProduct = async (e) => {
+  e.preventDefault();
 
-    if (error) {
-      console.error("Error adding product:", error);
-    } else {
-      resetForm();
-      setActiveModal("");
-      fetchProducts();
+  let imageUrl = null;
+
+  if (productForm.imageFile) {
+    const fileExt = productForm.imageFile.name.split('.').pop();
+    const fileName = `${Date.now()}.${fileExt}`;
+    const filePath = `product-images/${fileName}`;
+
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from("product-images")
+      .upload(filePath, productForm.imageFile);
+
+    if (uploadError) {
+      console.error("Image upload error:", uploadError);
+      return;
     }
-  };
+
+    const { data: publicUrlData } = supabase
+      .storage
+      .from("product-images")
+      .getPublicUrl(filePath);
+
+    imageUrl = publicUrlData.publicUrl;
+  }
+
+  const { error } = await supabase
+    .from("products")
+    .insert([{
+      name: productForm.name,
+      category: productForm.category,
+      price: parseFloat(productForm.price),
+      quantity: parseInt(productForm.quantity),
+      image_url: imageUrl
+    }]);
+
+  if (error) {
+    console.error("Error adding product:", error);
+  } else {
+    resetForm();
+    setActiveModal("");
+    fetchProducts();
+  }
+};
+
 
   const handleEditProduct = async (e) => {
     e.preventDefault();
-    
+
     if (!selectedProduct) return;
 
     const { error } = await supabase
@@ -63,7 +88,7 @@ const ProductPage = () => {
         name: productForm.name,
         category: productForm.category,
         price: parseFloat(productForm.price),
-        quantity: parseInt(productForm.quantity)
+        quantity: parseInt(productForm.quantity),
       })
       .eq("id", selectedProduct.id);
 
@@ -105,7 +130,7 @@ const ProductPage = () => {
       name: product.name || "",
       category: product.category || "",
       price: product.price?.toString() || "",
-      quantity: product.quantity?.toString() || ""
+      quantity: product.quantity?.toString() || "",
     });
     setActiveModal("edit");
   };
@@ -128,17 +153,19 @@ const ProductPage = () => {
       name: "",
       category: "",
       price: "",
-      quantity: ""
+      quantity: "",
+      imageFile: null,
     });
   };
-
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-gray-200">
       {/* Header */}
       <header className="bg-gray-800 shadow">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-white">Products Management</h1>
+            <h1 className="text-3xl font-bold text-white">
+              Products Management
+            </h1>
             <button
               onClick={openAddModal}
               className="px-4 py-2 bg-indigo-600 cursor-pointer text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-800"
@@ -161,22 +188,43 @@ const ProductPage = () => {
               <table className="min-w-full divide-y divide-gray-700">
                 <thead className="bg-gray-700">
                   <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                    >
                       ID
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                    >
                       Name
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                    >
                       Category
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                    >
                       Price
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                    >
                       Quantity
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      Image
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                    >
                       Actions
                     </th>
                   </tr>
@@ -200,6 +248,20 @@ const ProductPage = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                           {product.quantity}
                         </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {product.image_url ? (
+                            <img
+                              src={product.image_url}
+                              alt={product.name}
+                              className="h-12 w-12 object-cover rounded"
+                            />
+                          ) : (
+                            <span className="text-gray-400 text-sm">
+                              No Image
+                            </span>
+                          )}
+                        </td>
+                        
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <button
                             onClick={() => openEditModal(product)}
@@ -218,7 +280,10 @@ const ProductPage = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="6" className="px-6 py-4 text-center text-sm text-gray-400">
+                      <td
+                        colSpan="6"
+                        className="px-6 py-4 text-center text-sm text-gray-400"
+                      >
                         No products found. Add a new product to get started.
                       </td>
                     </tr>
@@ -239,55 +304,97 @@ const ProductPage = () => {
                 {activeModal === "add" ? "Add New Product" : "Edit Product"}
               </h3>
             </div>
-            
-            <form onSubmit={activeModal === "add" ? handleAddProduct : handleEditProduct}>
+
+            <form
+              onSubmit={
+                activeModal === "add" ? handleAddProduct : handleEditProduct
+              }
+            >
               <div className="px-6 py-4">
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-300 mb-1">Product Name</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Product Name
+                  </label>
                   <input
                     type="text"
                     value={productForm.name}
-                    onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
+                    onChange={(e) =>
+                      setProductForm({ ...productForm, name: e.target.value })
+                    }
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-white"
                     required
                   />
                 </div>
-                
+
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-300 mb-1">Category</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Category
+                  </label>
                   <input
                     type="text"
                     value={productForm.category}
-                    onChange={(e) => setProductForm({ ...productForm, category: e.target.value })}
+                    onChange={(e) =>
+                      setProductForm({
+                        ...productForm,
+                        category: e.target.value,
+                      })
+                    }
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-white"
                     required
                   />
                 </div>
-                
+
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-300 mb-1">Price (R)</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Price (R)
+                  </label>
                   <input
                     type="number"
                     step="0.01"
                     value={productForm.price}
-                    onChange={(e) => setProductForm({ ...productForm, price: e.target.value })}
+                    onChange={(e) =>
+                      setProductForm({ ...productForm, price: e.target.value })
+                    }
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-white"
                     required
                   />
                 </div>
-                
+
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-300 mb-1">Quantity</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Quantity
+                  </label>
                   <input
                     type="number"
                     value={productForm.quantity}
-                    onChange={(e) => setProductForm({ ...productForm, quantity: e.target.value })}
+                    onChange={(e) =>
+                      setProductForm({
+                        ...productForm,
+                        quantity: e.target.value,
+                      })
+                    }
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-white"
                     required
                   />
                 </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Product Image
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) =>
+                      setProductForm({
+                        ...productForm,
+                        imageFile: e.target.files[0],
+                      })
+                    }
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                  />
+                </div>
               </div>
-              
+
               <div className="px-6 py-3 bg-gray-900 flex justify-end space-x-3 rounded-b-lg">
                 <button
                   type="button"
@@ -315,14 +422,17 @@ const ProductPage = () => {
             <div className="px-6 py-4 border-b border-gray-700">
               <h3 className="text-lg font-medium text-white">Confirm Delete</h3>
             </div>
-            
+
             <div className="px-6 py-4">
               <p className="text-sm text-gray-300">
-                Are you sure you want to delete <span className="font-medium text-white">{selectedProduct.name}</span>? 
-                This action cannot be undone.
+                Are you sure you want to delete{" "}
+                <span className="font-medium text-white">
+                  {selectedProduct.name}
+                </span>
+                ? This action cannot be undone.
               </p>
             </div>
-            
+
             <div className="px-6 py-3 bg-gray-900 flex justify-end space-x-3 rounded-b-lg">
               <button
                 onClick={closeModal}
