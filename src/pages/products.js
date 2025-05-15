@@ -30,66 +30,87 @@ const ProductPage = () => {
     setIsLoading(false);
   };
 
-const handleAddProduct = async (e) => {
-  e.preventDefault();
+  const handleAddProduct = async (e) => {
+    e.preventDefault();
 
-  let imageUrl = null;
+    let imageUrl = null;
 
-  if (productForm.imageFile) {
-    const fileExt = productForm.imageFile.name.split('.').pop();
-    const fileName = `${Date.now()}.${fileExt}`;
-    const filePath = `product-images/${fileName}`;
+    if (productForm.imageFile) {
+      const fileExt = productForm.imageFile.name.split(".").pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `product-images/${fileName}`;
 
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from("product-images")
-      .upload(filePath, productForm.imageFile);
+      const { error: uploadError } = await supabase.storage
+        .from("product-images")
+        .upload(filePath, productForm.imageFile);
 
-    if (uploadError) {
-      console.error("Image upload error:", uploadError);
-      return;
+      if (uploadError) {
+        console.error("Image upload error:", uploadError);
+        return;
+      }
+
+      const { data: publicUrlData } = supabase.storage
+        .from("product-images")
+        .getPublicUrl(filePath);
+
+      imageUrl = publicUrlData.publicUrl;
     }
 
-    const { data: publicUrlData } = supabase
-      .storage
-      .from("product-images")
-      .getPublicUrl(filePath);
+    const { error } = await supabase.from("products").insert([
+      {
+        name: productForm.name,
+        category: productForm.category,
+        price: parseFloat(productForm.price),
+        quantity: parseInt(productForm.quantity),
+        image_url: imageUrl,
+      },
+    ]);
 
-    imageUrl = publicUrlData.publicUrl;
-  }
-
-  const { error } = await supabase
-    .from("products")
-    .insert([{
-      name: productForm.name,
-      category: productForm.category,
-      price: parseFloat(productForm.price),
-      quantity: parseInt(productForm.quantity),
-      image_url: imageUrl
-    }]);
-
-  if (error) {
-    console.error("Error adding product:", error);
-  } else {
-    resetForm();
-    setActiveModal("");
-    fetchProducts();
-  }
-};
-
+    if (error) {
+      console.error("Error adding product:", error);
+    } else {
+      resetForm();
+      setActiveModal("");
+      fetchProducts();
+    }
+  };
 
   const handleEditProduct = async (e) => {
     e.preventDefault();
 
     if (!selectedProduct) return;
 
+    let updatedFields = {
+      name: productForm.name,
+      category: productForm.category,
+      price: parseFloat(productForm.price),
+      quantity: parseInt(productForm.quantity),
+    };
+
+    if (productForm.imageFile) {
+      const fileExt = productForm.imageFile.name.split(".").pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `product-images/${fileName}`;
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("product-images")
+        .upload(filePath, productForm.imageFile);
+
+      if (uploadError) {
+        console.error("Image upload error:", uploadError);
+        return;
+      }
+
+      const { data: publicUrlData } = supabase.storage
+        .from("product-images")
+        .getPublicUrl(filePath);
+
+      updatedFields.image_url = publicUrlData.publicUrl;
+    }
+
     const { error } = await supabase
       .from("products")
-      .update({
-        name: productForm.name,
-        category: productForm.category,
-        price: parseFloat(productForm.price),
-        quantity: parseInt(productForm.quantity),
-      })
+      .update(updatedFields)
       .eq("id", selectedProduct.id);
 
     if (error) {
@@ -261,7 +282,7 @@ const handleAddProduct = async (e) => {
                             </span>
                           )}
                         </td>
-                        
+
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <button
                             onClick={() => openEditModal(product)}
