@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { supabase } from "../app/lib/supabaseClient";
+import {
+  fetchProducts,
+  uploadProductImage,
+  addProduct,
+  updateProduct,
+  deleteProduct,
+} from "../app/utils/products";
+import toast from "react-hot-toast";
 
 const ProductPage = () => {
   const [products, setProducts] = useState([]);
@@ -14,14 +21,9 @@ const ProductPage = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const fetchProducts = async () => {
+  const loadProducts = async () => {
     setIsLoading(true);
-    const { data, error } = await supabase.from("products").select("*");
-
+    const { data, error } = await fetchProducts();
     if (error) {
       console.error("Error fetching products:", error);
     } else {
@@ -30,55 +32,57 @@ const ProductPage = () => {
     setIsLoading(false);
   };
 
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
   const handleAddProduct = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
+    const toastId = toast.loading("Adding product...");
     let imageUrl = null;
 
     if (productForm.imageFile) {
-      const fileExt = productForm.imageFile.name.split(".").pop();
-      const fileName = `${Date.now()}.${fileExt}`;
-      const filePath = `product-images/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("product-images")
-        .upload(filePath, productForm.imageFile);
-
-      if (uploadError) {
-        console.error("Image upload error:", uploadError);
+      const { error, publicUrl } = await uploadProductImage(
+        productForm.imageFile
+      );
+      if (error) {
+        toast.error("Image upload failed", { id: toastId });
+        console.error("Image upload error:", error);
+        setIsLoading(false);
         return;
       }
-
-      const { data: publicUrlData } = supabase.storage
-        .from("product-images")
-        .getPublicUrl(filePath);
-
-      imageUrl = publicUrlData.publicUrl;
+      imageUrl = publicUrl;
     }
 
-    const { error } = await supabase.from("products").insert([
-      {
-        name: productForm.name,
-        category: productForm.category,
-        price: parseFloat(productForm.price),
-        quantity: parseInt(productForm.quantity),
-        image_url: imageUrl,
-      },
-    ]);
+    const { error } = await addProduct({
+      name: productForm.name,
+      category: productForm.category,
+      price: parseFloat(productForm.price),
+      quantity: parseInt(productForm.quantity),
+      image_url: imageUrl,
+    });
 
     if (error) {
+      toast.error("Failed to add product", { id: toastId });
       console.error("Error adding product:", error);
     } else {
+      toast.success("Product added!", { id: toastId });
       resetForm();
       setActiveModal("");
-      fetchProducts();
+      loadProducts();
     }
+
+    setIsLoading(false);
   };
 
   const handleEditProduct = async (e) => {
     e.preventDefault();
-
     if (!selectedProduct) return;
+
+    const toastId = toast.loading("Saving changes...");
+    setIsLoading(true);
 
     let updatedFields = {
       name: productForm.name,
@@ -88,56 +92,53 @@ const ProductPage = () => {
     };
 
     if (productForm.imageFile) {
-      const fileExt = productForm.imageFile.name.split(".").pop();
-      const fileName = `${Date.now()}.${fileExt}`;
-      const filePath = `product-images/${fileName}`;
-
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from("product-images")
-        .upload(filePath, productForm.imageFile);
-
-      if (uploadError) {
-        console.error("Image upload error:", uploadError);
+      const { error, publicUrl } = await uploadProductImage(
+        productForm.imageFile
+      );
+      if (error) {
+        toast.error("Image upload failed", { id: toastId });
+        console.error("Image upload error:", error);
+        setIsLoading(false);
         return;
       }
-
-      const { data: publicUrlData } = supabase.storage
-        .from("product-images")
-        .getPublicUrl(filePath);
-
-      updatedFields.image_url = publicUrlData.publicUrl;
+      updatedFields.image_url = publicUrl;
     }
 
-    const { error } = await supabase
-      .from("products")
-      .update(updatedFields)
-      .eq("id", selectedProduct.id);
+    const { error } = await updateProduct(selectedProduct.id, updatedFields);
 
     if (error) {
+      toast.error("Failed to update product", { id: toastId });
       console.error("Error updating product:", error);
     } else {
+      toast.success("Product updated!", { id: toastId });
       resetForm();
       setActiveModal("");
       setSelectedProduct(null);
-      fetchProducts();
+      loadProducts();
     }
+
+    setIsLoading(false);
   };
 
   const handleDeleteProduct = async () => {
     if (!selectedProduct) return;
 
-    const { error } = await supabase
-      .from("products")
-      .delete()
-      .eq("id", selectedProduct.id);
+    const toastId = toast.loading("Deleting product...");
+    setIsLoading(true);
+
+    const { error } = await deleteProduct(selectedProduct.id);
 
     if (error) {
+      toast.error("Failed to delete product", { id: toastId });
       console.error("Error deleting product:", error);
     } else {
+      toast.success("Product deleted!", { id: toastId });
       setActiveModal("");
       setSelectedProduct(null);
-      fetchProducts();
+      loadProducts();
     }
+
+    setIsLoading(false);
   };
 
   const openAddModal = () => {
