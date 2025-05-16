@@ -8,7 +8,7 @@ export default function App({ Component, pageProps }) {
   return (
     <>
       <Head>
-        <title>Inventory Tracker</title>
+        <title>InStock</title>
         <meta
           name="description"
           content="Track your product inventory easily with our web app."

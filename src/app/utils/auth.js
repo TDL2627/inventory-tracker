@@ -33,9 +33,9 @@ export async function getUser() {
   if (!user) return null;
 
   const { data, error } = await supabase
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
+    .from("users")
+    .select("name, role")
+    .eq("id", user.id)
     .single();
 
   if (error) throw error;
@@ -43,5 +43,7 @@ export async function getUser() {
   return data;
 }
 export async function logOut() {
-  const { error } = await supabase.auth.signOut()
+  const { error } = await supabase.auth.signOut();
+  if (error) throw error;
+  return;
 }
