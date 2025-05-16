@@ -6,12 +6,17 @@ import {
   updateProduct,
   deleteProduct,
 } from "../app/utils/products";
+import { getUser } from "../app/utils/auth";
 import toast from "react-hot-toast";
+import { useRouter } from "next/router";
 
 const ProductPage = () => {
   const [products, setProducts] = useState([]);
   const [activeModal, setActiveModal] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [user, setUser] = useState(null);
+  const router = useRouter();
+
   const [productForm, setProductForm] = useState({
     name: "",
     category: "",
@@ -21,9 +26,23 @@ const ProductPage = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
 
+  useEffect(() => {
+    const checkUser = async () => {
+      const user = await getUser();
+
+      if (!user) {
+        router.push("/auth");
+      }
+      setUser(user);
+    };
+    checkUser();
+  }, [router]);
+
   const loadProducts = async () => {
+    if (!user) return;
     setIsLoading(true);
-    const { data, error } = await fetchProducts();
+    const { data, error } = await fetchProducts(user.id);
+
     if (error) {
       console.error("Error fetching products:", error);
     } else {
@@ -62,7 +81,7 @@ const ProductPage = () => {
       price: parseFloat(productForm.price),
       quantity: parseInt(productForm.quantity),
       image_url: imageUrl,
-    });
+    }, user?.id);
 
     if (error) {
       toast.error("Failed to add product", { id: toastId });

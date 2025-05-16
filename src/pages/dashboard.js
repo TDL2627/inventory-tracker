@@ -98,37 +98,6 @@ const inventoryItems = [
   },
 ];
 
-const recentActivities = [
-  {
-    id: 1,
-    action: "Stock Updated",
-    item: "Office Chair",
-    user: "Sarah Johnson",
-    time: "2 hours ago",
-  },
-  {
-    id: 2,
-    action: "New Item Added",
-    item: "USB Hub",
-    user: "Michael Chen",
-    time: "3 hours ago",
-  },
-  {
-    id: 3,
-    action: "Order Placed",
-    item: "Wireless Keyboard (x10)",
-    user: "Emma Wilson",
-    time: "5 hours ago",
-  },
-  {
-    id: 4,
-    action: "Item Removed",
-    item: "Desk Mat",
-    user: "Sarah Johnson",
-    time: "1 day ago",
-  },
-];
-
 export default function InventoryDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
@@ -138,30 +107,7 @@ export default function InventoryDashboard() {
   const [lowStockCount, setLowStockCount] = useState(0);
   const [noStockCount, setNoStockCount] = useState(0);
 
-  const loadProducts = async () => {
-    const { data, error } = await fetchProducts();
-    if (error) {
-      console.error("Error fetching products:", error);
-    } else {
-      setProducts(data);
-      const total = data.reduce((sum, product) => {
-        return sum + product.price * product.quantity;
-      }, 0);
-      setTotalPrice(total);
-      // Calculate stock stats
-      const low = data.filter(
-        (product) => product.quantity > 0 && product.quantity <= 5
-      ).length;
-      const none = data.filter((product) => product.quantity === 0).length;
-
-      setLowStockCount(low);
-      setNoStockCount(none);
-    }
-  };
-
-  useEffect(() => {
-    loadProducts();
-  }, []);
+  const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -174,6 +120,43 @@ export default function InventoryDashboard() {
     };
     checkUser();
   }, [router]);
+
+  const loadProducts = async () => {
+    if (!user) return;
+
+    const { data, error } = await fetchProducts(user.id);
+ console.log("Fetched products:", data);
+ 
+    if (error) {
+      console.error("Error fetching products:", error);
+    } else {
+      setProducts(data);
+    }
+  };
+
+  useEffect(() => {
+    loadProducts();
+    setHasMounted(true);
+  }, [user]);
+
+  useEffect(() => {
+    if (!hasMounted) return;
+
+    const total = products.reduce(
+      (sum, product) => sum + product.price * product.quantity,
+      0
+    );
+    setTotalPrice(total);
+
+    const low = products.filter(
+      (p) => p.quantity > 0 && p.quantity <= 5
+    ).length;
+    const none = products.filter((p) => p.quantity === 0).length;
+
+    setLowStockCount(low);
+    setNoStockCount(none);
+  }, [products, hasMounted]);
+
   return (
     <div className="flex h-screen bg-gray-900 text-gray-100">
       {/* Mobile sidebar backdrop */}
@@ -316,13 +299,6 @@ export default function InventoryDashboard() {
                   <span className="text-3xl font-bold text-white">
                     {products?.length || 0}
                   </span>
-                  <div className="flex items-center mt-1 text-sm">
-                    <span className="flex items-center text-green-500">
-                      <ArrowUpRight className="h-3 w-3 mr-1" />
-                      <span>4.6%</span>
-                    </span>
-                    <span className="text-gray-400 ml-2">vs last month</span>
-                  </div>
                 </div>
               </div>
             </div>
@@ -338,19 +314,14 @@ export default function InventoryDashboard() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-3xl font-bold text-white">
-                    {new Intl.NumberFormat("en-ZA", {
-                      style: "currency",
-                      currency: "ZAR",
-                    }).format(totalPrice)}
-                  </span>
-                  <div className="flex items-center mt-1 text-sm">
-                    <span className="flex items-center text-green-500">
-                      <ArrowUpRight className="h-3 w-3 mr-1" />
-                      <span>12.3%</span>
+                  {hasMounted && (
+                    <span className="text-3xl font-bold text-white">
+                      {new Intl.NumberFormat("en-ZA", {
+                        style: "currency",
+                        currency: "ZAR",
+                      }).format(totalPrice)}
                     </span>
-                    <span className="text-gray-400 ml-2">vs last month</span>
-                  </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -369,13 +340,6 @@ export default function InventoryDashboard() {
                   <span className="text-3xl font-bold text-white">
                     {lowStockCount}
                   </span>
-                  <div className="flex items-center mt-1 text-sm">
-                    <span className="flex items-center text-red-500">
-                      <ArrowUpRight className="h-3 w-3 mr-1" />
-                      <span>8.4%</span>
-                    </span>
-                    <span className="text-gray-400 ml-2">vs last month</span>
-                  </div>
                 </div>
               </div>
             </div>
@@ -391,25 +355,20 @@ export default function InventoryDashboard() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-3xl font-bold text-white">{noStockCount}</span>
-                  <div className="flex items-center mt-1 text-sm">
-                    <span className="flex items-center text-red-500">
-                      <ArrowDownRight className="h-3 w-3 mr-1" />
-                      <span>2.1%</span>
-                    </span>
-                    <span className="text-gray-400 ml-2">vs last month</span>
-                  </div>
+                  <span className="text-3xl font-bold text-white">
+                    {noStockCount}
+                  </span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Charts & Activities */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1  gap-6 mb-8">
             {/* Stock Trend Chart */}
-            <div className="lg:col-span-2 bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <div className=" bg-gray-800 rounded-lg p-6 border border-gray-700">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-medium text-white">Stock Trends</h2>
+                <h2 className="text-lg font-medium text-white">Sales</h2>
                 <div className="flex items-center space-x-2">
                   <select className="bg-gray-700 border border-gray-600 text-gray-300 text-sm rounded-md px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500">
                     <option>Last 7 days</option>
@@ -441,47 +400,6 @@ export default function InventoryDashboard() {
                     />
                   </LineChart>
                 </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Recent Activities */}
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-medium text-white">
-                  Recent Activities
-                </h2>
-                <button className="text-gray-400 hover:text-white">
-                  <MoreHorizontal className="h-5 w-5" />
-                </button>
-              </div>
-              <div className="space-y-4">
-                {recentActivities.map((activity) => (
-                  <div
-                    key={activity.id}
-                    className="border-b border-gray-700 pb-4 last:border-0 last:pb-0"
-                  >
-                    <div className="flex justify-between mb-1">
-                      <span className="font-medium text-gray-100">
-                        {activity.action}
-                      </span>
-                      <span className="text-xs text-gray-400">
-                        {activity.time}
-                      </span>
-                    </div>
-                    <div className="text-sm text-gray-400">
-                      {activity.item} by {activity.user}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-4 text-center">
-                <a
-                  href="#"
-                  className="inline-flex items-center text-sm font-medium text-indigo-400 hover:text-indigo-300"
-                >
-                  View all activities
-                  <ArrowRight className="ml-1 h-4 w-4" />
-                </a>
               </div>
             </div>
           </div>
