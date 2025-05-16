@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
 import { logOut } from "../utils/auth";
-
+import { toast } from "react-hot-toast";
 import { PackageCheck, Menu, X } from "lucide-react";
 
 const Navbar = () => {
@@ -65,6 +65,7 @@ const Navbar = () => {
               <button
                 onClick={() => {
                   logOut();
+                  toast.success("Logged out successfully");
                   router.push(`/`);
                 }}
                 className="ml-3 px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-500 rounded-md cursor-pointer hidden md:block"
@@ -128,6 +129,7 @@ const Navbar = () => {
               <button
                 onClick={() => {
                   logOut();
+                  toast.success("Logged out successfully");
                   setMobileMenuOpen(!mobileMenuOpen);
                   router.push(`/`);
                 }}

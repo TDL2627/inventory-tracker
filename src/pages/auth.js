@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { signIn, signUp } from "../app/utils/auth";
 import { useRouter } from "next/router";
 import { Store, User, PackageCheck } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function AuthPage() {
   const router = useRouter();
@@ -38,22 +39,22 @@ export default function AuthPage() {
         signupData.role,
         signupData.name
       );
-      alert("Signed up!");
+      toast.success("Signed up! 🎉");
       closeModal();
       router.push("/dashboard");
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message || "Signup failed");
     }
   };
 
   const handleLogin = async () => {
     try {
       await signIn(loginData.email, loginData.password);
-      alert("Logged in!");
+      toast.success("Logged in! 👏");
       closeModal();
       router.push("/dashboard");
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message || "Login failed");
     }
   };
 
