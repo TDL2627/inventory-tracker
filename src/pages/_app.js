@@ -1,5 +1,7 @@
 import '../app/globals.css';
 import Head from 'next/head';
+import Navbar from '@/app/components/navbar';
+import Footer from '@/app/components/footer';
 
 export default function App({ Component, pageProps }) {
   return (
@@ -11,7 +13,10 @@ export default function App({ Component, pageProps }) {
         <link rel="icon" href="/inventory.png" />
         <link rel="apple-touch-icon" href="/inventory.png" />
       </Head>
+      <Navbar />
+      {/* Main content */}
       <Component {...pageProps} />
+      <Footer />
     </>
   )
 }
