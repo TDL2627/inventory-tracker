@@ -28,6 +28,7 @@ import {
 import { logOut, getUser } from "../app/utils/auth";
 import { useRouter } from "next/router";
 import { toast } from "react-hot-toast";
+import { fetchProducts } from "../app/utils/products";
 
 // Sample data for charts and tables
 const stockData = [
@@ -132,6 +133,35 @@ export default function InventoryDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
   const [user, setUser] = useState(null);
+  const [products, setProducts] = useState([]);
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [lowStockCount, setLowStockCount] = useState(0);
+  const [noStockCount, setNoStockCount] = useState(0);
+
+  const loadProducts = async () => {
+    const { data, error } = await fetchProducts();
+    if (error) {
+      console.error("Error fetching products:", error);
+    } else {
+      setProducts(data);
+      const total = data.reduce((sum, product) => {
+        return sum + product.price * product.quantity;
+      }, 0);
+      setTotalPrice(total);
+      // Calculate stock stats
+      const low = data.filter(
+        (product) => product.quantity > 0 && product.quantity <= 5
+      ).length;
+      const none = data.filter((product) => product.quantity === 0).length;
+
+      setLowStockCount(low);
+      setNoStockCount(none);
+    }
+  };
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -197,7 +227,7 @@ export default function InventoryDashboard() {
                 className="flex items-center px-4 py-2 text-gray-400 hover:text-gray-100 hover:bg-gray-700 rounded-md"
               >
                 <ShoppingCart className="w-5 h-5 mr-3" />
-                Orders
+                Sales
               </a>
 
               <div className="px-2 py-2 mt-6 text-xs font-semibold text-gray-400 uppercase">
@@ -283,7 +313,9 @@ export default function InventoryDashboard() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-3xl font-bold text-white">1,254</span>
+                  <span className="text-3xl font-bold text-white">
+                    {products?.length || 0}
+                  </span>
                   <div className="flex items-center mt-1 text-sm">
                     <span className="flex items-center text-green-500">
                       <ArrowUpRight className="h-3 w-3 mr-1" />
@@ -306,7 +338,12 @@ export default function InventoryDashboard() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-3xl font-bold text-white">$126.4K</span>
+                  <span className="text-3xl font-bold text-white">
+                    {new Intl.NumberFormat("en-ZA", {
+                      style: "currency",
+                      currency: "ZAR",
+                    }).format(totalPrice)}
+                  </span>
                   <div className="flex items-center mt-1 text-sm">
                     <span className="flex items-center text-green-500">
                       <ArrowUpRight className="h-3 w-3 mr-1" />
@@ -329,7 +366,9 @@ export default function InventoryDashboard() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-3xl font-bold text-white">24</span>
+                  <span className="text-3xl font-bold text-white">
+                    {lowStockCount}
+                  </span>
                   <div className="flex items-center mt-1 text-sm">
                     <span className="flex items-center text-red-500">
                       <ArrowUpRight className="h-3 w-3 mr-1" />
@@ -352,7 +391,7 @@ export default function InventoryDashboard() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-3xl font-bold text-white">7</span>
+                  <span className="text-3xl font-bold text-white">{noStockCount}</span>
                   <div className="flex items-center mt-1 text-sm">
                     <span className="flex items-center text-red-500">
                       <ArrowDownRight className="h-3 w-3 mr-1" />
