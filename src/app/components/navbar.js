@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
+import { logOut } from "../utils/auth";
 
 import { PackageCheck, Menu, X } from "lucide-react";
 
@@ -39,29 +40,38 @@ const Navbar = () => {
                 </div> */}
               </div>
             </div>
-            {router.pathname !== "/auth" &&
-              router.pathname !== "/dashboard" && (
-                <div className="hidden md:block">
-                  <div className="flex items-center">
-                    <button
-                      onClick={() => {
-                        goToAuthWithModal("login");
-                      }}
-                      className="px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white rounded-md cursor-pointer"
-                    >
-                      Sign In
-                    </button>
-                    <button
-                      onClick={() => {
-                        goToAuthWithModal("signup");
-                      }}
-                      className="ml-3 px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-md cursor-pointer"
-                    >
-                      Get Started
-                    </button>
-                  </div>
+            {router.pathname === "/" ? (
+              <div className="hidden md:block">
+                <div className="flex items-center">
+                  <button
+                    onClick={() => {
+                      goToAuthWithModal("login");
+                    }}
+                    className="px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white rounded-md cursor-pointer"
+                  >
+                    Sign In
+                  </button>
+                  <button
+                    onClick={() => {
+                      goToAuthWithModal("signup");
+                    }}
+                    className="ml-3 px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-md cursor-pointer"
+                  >
+                    Get Started
+                  </button>
                 </div>
-              )}
+              </div>
+            ) : (
+              <button
+                onClick={() => {
+                  logOut();
+                  router.push(`/`);
+                }}
+                className="ml-3 px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-500 rounded-md cursor-pointer hidden md:block"
+              >
+                Sign Out
+              </button>
+            )}
             {router.pathname !== "/auth" && (
               <div className="md:hidden">
                 <button
@@ -91,31 +101,41 @@ const Navbar = () => {
                 Features
               </a> */}
             </div>
-            {router.pathname !== "/auth" &&
-              router.pathname !== "/dashboard" && (
-                <div className="pt-4 pb-3 border-t border-gray-700">
-                  <div className="px-2 space-y-1">
-                    <button
-                      onClick={() => {
-                        goToAuthWithModal("login");
-                        setMobileMenuOpen(!mobileMenuOpen);
-                      }}
-                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
-                    >
-                      Sign in
-                    </button>
-                    <button
-                      onClick={() => {
-                        goToAuthWithModal("signup");
-                        setMobileMenuOpen(!mobileMenuOpen);
-                      }}
-                      className="block px-3 py-2 rounded-md text-base font-medium text-white bg-indigo-600 hover:bg-indigo-500"
-                    >
-                      Get Started
-                    </button>
-                  </div>
+            {router.pathname === "/" ? (
+              <div className="pt-4 pb-3 border-t border-gray-700">
+                <div className="px-2 space-y-1">
+                  <button
+                    onClick={() => {
+                      goToAuthWithModal("login");
+                      setMobileMenuOpen(!mobileMenuOpen);
+                    }}
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+                  >
+                    Sign in
+                  </button>
+                  <button
+                    onClick={() => {
+                      goToAuthWithModal("signup");
+                      setMobileMenuOpen(!mobileMenuOpen);
+                    }}
+                    className="block px-3 py-2 rounded-md text-base font-medium text-white bg-indigo-600 hover:bg-indigo-500"
+                  >
+                    Get Started
+                  </button>
                 </div>
-              )}
+              </div>
+            ) : (
+              <button
+                onClick={() => {
+                  logOut();
+                  setMobileMenuOpen(!mobileMenuOpen);
+                  router.push(`/`);
+                }}
+                className="m-4 px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-500 rounded-md cursor-pointer"
+              >
+                Sign Out
+              </button>
+            )}
           </div>
         )}
       </nav>
