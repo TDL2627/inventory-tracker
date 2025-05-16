@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signIn, signUp } from "../app/utils/auth";
-import { useRouter } from 'next/router';
-
+import { useRouter } from "next/router";
 
 export default function AuthPage() {
-  const [activeModal, setActiveModal] = useState(null); 
+  const [activeModal, setActiveModal] = useState(null);
   const router = useRouter();
 
   const [signupData, setSignupData] = useState({
@@ -31,7 +30,7 @@ export default function AuthPage() {
       );
       alert("Signed up!");
       closeModal();
-      router.push('/dashboard');
+      router.push("/dashboard");
     } catch (err) {
       alert(err.message);
     }
@@ -42,11 +41,20 @@ export default function AuthPage() {
       await signIn(loginData.email, loginData.password);
       alert("Logged in!");
       closeModal();
-      router.push('/dashboard');
+      router.push("/dashboard");
     } catch (err) {
       alert(err.message);
     }
   };
+
+  useEffect(() => {
+    if (router.isReady) {
+      const { modal } = router.query;
+      if (modal === "signup" || modal === "login") {
+        setActiveModal(modal);
+      }
+    }
+  }, [router.isReady, router.query]);
 
   return (
     <div className="min-h-screen flex items-center justify-center flex-col gap-6 bg-gray-900 text-white">
