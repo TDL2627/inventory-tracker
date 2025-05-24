@@ -17,6 +17,8 @@ const ProductPage = () => {
   const [user, setUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // You can adjust this
 
   const router = useRouter();
 
@@ -67,6 +69,13 @@ const ProductPage = () => {
       categoryFilter === "" || product.category === categoryFilter;
     return matchesSearch && matchesCategory;
   });
+
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const handleAddProduct = async (e) => {
     e.preventDefault();
@@ -309,8 +318,8 @@ const ProductPage = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-gray-800 divide-y divide-gray-700">
-                  {filteredProducts.length > 0 ? (
-                    filteredProducts.map((product) => (
+                  {paginatedProducts.length > 0 ? (
+                    paginatedProducts.map((product) => (
                       <tr key={product.id} className="hover:bg-gray-600">
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                           {product.id}
@@ -372,6 +381,27 @@ const ProductPage = () => {
             </div>
           </div>
         )}
+        <div className="flex justify-between items-center mt-4 text-gray-300">
+          <div>
+            Page {currentPage} of {totalPages}
+          </div>
+          <div className="space-x-2">
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 cursor-pointer bg-gray-700 rounded disabled:opacity-50"
+            >
+              Previous
+            </button>
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 cursor-pointer bg-gray-700 rounded disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        </div>
       </main>
 
       {/* Product Form Modal (Add/Edit) */}
