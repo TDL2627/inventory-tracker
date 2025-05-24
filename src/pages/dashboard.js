@@ -3,18 +3,9 @@ import {
   BarChart3,
   PackageCheck,
   Search,
-  User,
-  Home,
   ShoppingCart,
-  LogOut,
-  Menu,
-  X,
   Plus,
   Filter,
-  ArrowUpRight,
-  ArrowDownRight,
-  MoreHorizontal,
-  ArrowRight,
 } from "lucide-react";
 import {
   LineChart,
@@ -163,24 +154,7 @@ export default function InventoryDashboard() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-gray-800 border-b border-gray-700 md:hidden">
-          <div className="flex items-center justify-between h-16 px-6">
-            <div className="flex-1 flex justify-center lg:justify-end">
-              <div className="flex items-center cursor-pointer">
-                <PackageCheck className="h-8 w-8 text-indigo-500" />
-                <span className="ml-2 text-xl font-bold">InStock</span>
-              </div>
-            </div>
-            <div className="flex items-center lg:hidden">
-              <button
-                className="text-gray-400 hover:text-white"
-                onClick={() => setSidebarOpen(true)}
-              >
-                <Menu className="h-6 w-6" />
-              </button>
-            </div>
-          </div>
-        </header>
+
         {/* Dashboard Content */}
         <main className="flex-1 overflow-y-auto bg-gray-900 p-6">
           {/* Welcome & Date */}

@@ -21,13 +21,18 @@ export default function App({ Component, pageProps }) {
       <Toaster position="top-center" reverseOrder={false} />
 
       {/* Main content */}
-      <div className="min-h-screen lg:flex grid">
-        <Navbar />
-        <main className="flex-1">
-          <Component {...pageProps} />
-        </main>
+      <div className="min-h-screen flex flex-col">
+        {/* Content area */}
+        <div className="flex flex-1 lg:flex-row flex-col">
+          <Navbar />
+          <main className="flex-1">
+            <Component {...pageProps} />
+          </main>
+        </div>
+
+        {/* Footer always full width */}
+        <Footer />
       </div>
-      <Footer />
     </>
   );
 }

@@ -31,6 +31,8 @@ export const uploadProductImage = async (imageFile) => {
 
 // Add new product
 export const addProduct = async (product, userId) => {
+  console.log("Adding product:", product, "for user:", userId);
+  
   const productWithOwner = {
     ...product,
     ownerId: userId,

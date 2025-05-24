@@ -3,8 +3,8 @@ import { PackageCheck } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-900">
-      <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
+    <footer className="bg-gray-900 w-full ">
+      <div className="min-w-full mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
         <div className="xl:grid xl:grid-cols-3 xl:gap-8">
           <div className="space-y-8 xl:col-span-1">
             <div className="flex items-center">

@@ -15,6 +15,9 @@ const ProductPage = () => {
   const [activeModal, setActiveModal] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [user, setUser] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+
   const router = useRouter();
 
   const [productForm, setProductForm] = useState({
@@ -29,8 +32,8 @@ const ProductPage = () => {
   useEffect(() => {
     const checkUser = async () => {
       const user = await getUser();
-      console.log(user,"aye use");
-      
+      console.log(user, "aye use");
+
       if (!user) {
         router.push("/auth");
       }
@@ -56,6 +59,15 @@ const ProductPage = () => {
     loadProducts();
   }, [user]);
 
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch = product.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesCategory =
+      categoryFilter === "" || product.category === categoryFilter;
+    return matchesSearch && matchesCategory;
+  });
+
   const handleAddProduct = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -76,13 +88,16 @@ const ProductPage = () => {
       imageUrl = publicUrl;
     }
 
-    const { error } = await addProduct({
-      name: productForm.name,
-      category: productForm.category,
-      price: parseFloat(productForm.price),
-      quantity: parseInt(productForm.quantity),
-      image_url: imageUrl,
-    }, user?.id);
+    const { error } = await addProduct(
+      {
+        name: productForm.name,
+        category: productForm.category,
+        price: parseFloat(productForm.price),
+        quantity: parseInt(productForm.quantity),
+        image_url: imageUrl,
+      },
+      user?.id
+    );
 
     if (error) {
       toast.error("Failed to add product", { id: toastId });
@@ -215,6 +230,28 @@ const ProductPage = () => {
               Add New Product
             </button>
           </div>
+          <div className="my-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <input
+              type="text"
+              placeholder="Search by name"
+              className="px-4 py-2 bg-gray-700 text-gray-200 rounded w-full sm:max-w-xs"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+
+            <select
+              className="px-4 py-2 bg-gray-700 text-gray-200 rounded w-full sm:max-w-xs"
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+            >
+              <option value="">All Categories</option>
+              {[...new Set(products.map((p) => p.category))].map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </header>
 
@@ -272,8 +309,8 @@ const ProductPage = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-gray-800 divide-y divide-gray-700">
-                  {products.length > 0 ? (
-                    products.map((product) => (
+                  {filteredProducts.length > 0 ? (
+                    filteredProducts.map((product) => (
                       <tr key={product.id} className="hover:bg-gray-600">
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                           {product.id}

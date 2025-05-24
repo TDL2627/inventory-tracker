@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import Link from "next/link";
 import { logOut, getUser } from "../utils/auth";
 import { toast } from "react-hot-toast";
 import {
@@ -31,11 +32,13 @@ const Sidebar = () => {
     setSidebarOpen(false);
   };
 
-  // Check if on homepage
+  // Helper to check if nav link is active
+  const isActive = (path) => router.pathname === path;
+
+  // Home page top nav shortcut (unchanged)
   const isHome = router.pathname === "/";
 
   if (isHome) {
-    // Top Nav for home page
     return (
       <header className="bg-gray-900 text-white flex items-center justify-between lg:px-10 px-4  h-16 fixed w-full z-20">
         <div
@@ -66,7 +69,7 @@ const Sidebar = () => {
     );
   }
 
-  // Sidebar for other pages
+  // Sidebar for other pages with active state
   return (
     <>
       {/* Mobile toggle button */}
@@ -128,20 +131,33 @@ const Sidebar = () => {
 
               {user ? (
                 <>
-                  <a
-                    href="#"
-                    className="flex items-center px-4 py-2 text-gray-100 bg-gray-700 rounded-md"
+                  <Link
+                    href="/dashboard"
+                    className={`flex items-center px-4 py-2 rounded-md ${
+                      isActive("/dashboard")
+                        ? "bg-gray-700 text-gray-100"
+                        : "text-gray-400 hover:text-gray-100 hover:bg-gray-700"
+                    }`}
+                    onClick={() => setSidebarOpen(false)}
                   >
                     <Home className="w-5 h-5 mr-3" />
                     Dashboard
-                  </a>
-                  <a
-                    href="#"
-                    className="flex items-center px-4 py-2 text-gray-400 hover:text-gray-100 hover:bg-gray-700 rounded-md"
+                  </Link>
+
+                  <Link
+                    href="/products"
+                    className={`flex items-center px-4 py-2 rounded-md ${
+                      isActive("/products")
+                        ? "bg-gray-700 text-gray-100"
+                        : "text-gray-400 hover:text-gray-100 hover:bg-gray-700"
+                    }`}
+                    onClick={() => setSidebarOpen(false)}
                   >
                     <PackageCheck className="w-5 h-5 mr-3" />
                     Inventory
-                  </a>
+                  </Link>
+
+                  {/* Example Sales link (no route provided, so no active) */}
                   <a
                     href="#"
                     className="flex items-center px-4 py-2 text-gray-400 hover:text-gray-100 hover:bg-gray-700 rounded-md"
@@ -153,20 +169,28 @@ const Sidebar = () => {
                   <div className="px-2 py-2 mt-6 text-xs font-semibold text-gray-400 uppercase">
                     Settings
                   </div>
-                  <a
-                    href="#"
-                    className="flex items-center px-4 py-2 text-gray-400 hover:text-gray-100 hover:bg-gray-700 rounded-md"
+
+                  {/* Profile link (assuming /profile) */}
+                  <Link
+                    href="/profile"
+                    className={`flex items-center px-4 py-2 rounded-md ${
+                      isActive("/profile")
+                        ? "bg-gray-700 text-gray-100"
+                        : "text-gray-400 hover:text-gray-100 hover:bg-gray-700"
+                    }`}
+                    onClick={() => setSidebarOpen(false)}
                   >
                     <User className="w-5 h-5 mr-3" />
                     Profile
-                  </a>
+                  </Link>
+
                   <button
                     onClick={() => {
                       logOut();
                       toast.success("Logged out successfully");
                       router.push(`/`);
                     }}
-                    className="flex items-center px-4 py-2 text-gray-400 hover:text-gray-100 hover:bg-gray-700 rounded-md"
+                    className="flex items-center px-4 py-2 text-gray-400 hover:text-gray-100 hover:bg-gray-700 rounded-md w-full cursor-pointer"
                   >
                     <LogOut className="w-5 h-5 mr-3" />
                     Log Out
