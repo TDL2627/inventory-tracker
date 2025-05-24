@@ -29,7 +29,8 @@ const ProductPage = () => {
   useEffect(() => {
     const checkUser = async () => {
       const user = await getUser();
-
+      console.log(user,"aye use");
+      
       if (!user) {
         router.push("/auth");
       }
@@ -53,7 +54,7 @@ const ProductPage = () => {
 
   useEffect(() => {
     loadProducts();
-  }, []);
+  }, [user]);
 
   const handleAddProduct = async (e) => {
     e.preventDefault();
@@ -201,11 +202,11 @@ const ProductPage = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-gray-200">
       {/* Header */}
-      <header className="bg-gray-800 shadow">
+      <header className="">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
             <h1 className="text-3xl font-bold text-white">
-              Products Management
+              Inventory Management
             </h1>
             <button
               onClick={openAddModal}

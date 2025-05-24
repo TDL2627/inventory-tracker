@@ -17,11 +17,16 @@ export default function App({ Component, pageProps }) {
         <link rel="icon" href="/inventory.png" />
         <link rel="apple-touch-icon" href="/inventory.png" />
       </Head>
-      <Navbar />
+
       <Toaster position="top-center" reverseOrder={false} />
 
       {/* Main content */}
-      <Component {...pageProps} />
+      <div className="min-h-screen lg:flex grid">
+        <Navbar />
+        <main className="flex-1">
+          <Component {...pageProps} />
+        </main>
+      </div>
       <Footer />
     </>
   );
