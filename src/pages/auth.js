@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { signIn, signUp } from "../app/utils/auth";
+import { signIn, signUp, getUser } from "../app/utils/auth";
 import { useRouter } from "next/router";
 import { Store, User, PackageCheck } from "lucide-react";
 import toast from "react-hot-toast";
@@ -42,7 +42,11 @@ export default function AuthPage() {
 
       toast.success("Signed up! 🎉");
       closeModal();
-      router.push("/dashboard");
+      if (signupData.role === "teller") {
+        router.push("/tellers");
+      } else {
+        router.push("/dashboard");
+      }
     } catch (err) {
       toast.error(err.message || "Signup failed");
     }
@@ -51,8 +55,14 @@ export default function AuthPage() {
   const handleLogin = async () => {
     try {
       await signIn(loginData.email, loginData.password);
+      const user = await getUser();
+      
       toast.success("Logged in! 👏");
-      router.push("/dashboard");
+      if (user.role === "teller") {
+        router.push("/tellers");
+      } else {
+        router.push("/dashboard");
+      }
 
       closeModal();
     } catch (err) {
@@ -128,7 +138,7 @@ export default function AuthPage() {
               <div className="text-sm text-gray-400">Select your role:</div>
               <div className="grid grid-cols-2 gap-2">
                 <button
-                  className={`flex items-center gap-2 p-2 rounded border ${
+                  className={`flex items-center gap-2 p-2 rounded border cursor-pointer ${
                     signupData.role === "owner"
                       ? "bg-indigo-700 border-indigo-500"
                       : "bg-gray-800 border-gray-700"
@@ -141,7 +151,7 @@ export default function AuthPage() {
                   Owner
                 </button>
                 <button
-                  className={`flex items-center gap-2 p-2 rounded border ${
+                  className={`flex items-center gap-2 p-2 rounded border cursor-pointer ${
                     signupData.role === "teller"
                       ? "bg-blue-700 border-blue-500"
                       : "bg-gray-800 border-gray-700"
@@ -154,6 +164,17 @@ export default function AuthPage() {
                   Teller
                 </button>
               </div>
+
+              {/* Show owner's email field only if role is teller */}
+              {signupData.role === "teller" && (
+                <input
+                  placeholder="Owner's Email"
+                  className="w-full p-2 rounded bg-gray-800 text-white border border-gray-700"
+                  onChange={(e) =>
+                    setSignupData({ ...signupData, ownerEmail: e.target.value })
+                  }
+                />
+              )}
 
               <div className="text-xs text-gray-500">
                 <strong>Owner:</strong> Manages the store, products, and users.{" "}

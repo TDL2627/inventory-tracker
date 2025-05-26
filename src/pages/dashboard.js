@@ -104,9 +104,9 @@ export default function InventoryDashboard() {
     const checkUser = async () => {
       const user = await getUser();
 
-      if (!user) {
+      if (!user || user.role !== "owner") {
         router.push("/auth");
-      }
+      } 
       setUser(user);
     };
     checkUser();
@@ -116,8 +116,8 @@ export default function InventoryDashboard() {
     if (!user) return;
 
     const { data, error } = await fetchProducts(user.id);
- console.log("Fetched products:", data);
- 
+    console.log("Fetched products:", data);
+
     if (error) {
       console.error("Error fetching products:", error);
     } else {
@@ -150,11 +150,8 @@ export default function InventoryDashboard() {
 
   return (
     <div className="flex h-screen bg-gray-900 text-gray-100 ">
-     
-
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-
         {/* Dashboard Content */}
         <main className="flex-1 overflow-y-auto bg-gray-900 p-6">
           {/* Welcome & Date */}
