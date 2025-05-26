@@ -35,12 +35,13 @@ const Sidebar = () => {
   // Helper to check if nav link is active
   const isActive = (path) => router.pathname === path;
 
-  // Home page top nav shortcut (unchanged)
+  // Show top nav only on home ("/") and auth ("/auth")
   const isHome = router.pathname === "/";
+  const isAuth = router.pathname === "/auth";
 
   if (isHome) {
     return (
-      <header className="bg-gray-900 text-white flex items-center justify-between lg:px-10 px-4  h-16 fixed w-full z-20">
+      <header className="bg-gray-900 text-white flex items-center justify-between lg:px-10 px-4 h-16 fixed w-full z-20">
         <div
           onClick={() => router.push(user ? "/dashboard" : "/")}
           className="flex items-center cursor-pointer"
@@ -52,13 +53,13 @@ const Sidebar = () => {
         <nav className="flex space-x-4">
           <>
             <button
-              onClick={() => goToAuthWithModal("login")}
-              className="hover:underline cursor-pointer"
+              onClick={() => router.push("/auth?modal=login")}
+              className="hover:underline cursor-pointer md:block hidden"
             >
               Sign In
             </button>
             <button
-              onClick={() => goToAuthWithModal("signup")}
+              onClick={() => router.push("/auth")}
               className="bg-indigo-600 px-3 py-1 rounded hover:bg-indigo-500  cursor-pointer"
             >
               Get Started
@@ -68,11 +69,13 @@ const Sidebar = () => {
       </header>
     );
   }
-
+  if (isAuth) {
+    return null;
+  }
   // Sidebar for other pages with active state
   return (
     <>
-      {/* Mobile toggle button */}
+      <></>
       <div className="lg:hidden p-4 bg-gray-900 flex justify-between items-center">
         <div
           onClick={() => router.push(user ? "/dashboard" : "/")}
@@ -170,7 +173,6 @@ const Sidebar = () => {
                     Settings
                   </div>
 
-                  {/* Profile link (assuming /profile) */}
                   <Link
                     href="/profile"
                     className={`flex items-center px-4 py-2 rounded-md ${
@@ -200,7 +202,7 @@ const Sidebar = () => {
                 <>
                   <button
                     onClick={() => goToAuthWithModal("login")}
-                    className="w-full text-left px-4 py-2 text-gray-400 hover:text-gray-100 hover:bg-gray-700 rounded-md"
+                    className="w-full text-left px-4 py-2  text-gray-400 hover:text-gray-100 hover:bg-gray-700 rounded-md"
                   >
                     Sign In
                   </button>

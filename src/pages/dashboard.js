@@ -149,7 +149,7 @@ export default function InventoryDashboard() {
   }, [products, hasMounted]);
 
   return (
-    <div className="flex h-screen bg-gray-900 text-gray-100">
+    <div className="flex h-screen bg-gray-900 text-gray-100 ">
      
 
       {/* Main Content */}

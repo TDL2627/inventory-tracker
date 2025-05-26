@@ -39,6 +39,7 @@ export default function AuthPage() {
         signupData.role,
         signupData.name
       );
+
       toast.success("Signed up! 🎉");
       closeModal();
       router.push("/dashboard");
@@ -51,8 +52,9 @@ export default function AuthPage() {
     try {
       await signIn(loginData.email, loginData.password);
       toast.success("Logged in! 👏");
-      closeModal();
       router.push("/dashboard");
+
+      closeModal();
     } catch (err) {
       toast.error(err.message || "Login failed");
     }
@@ -81,7 +83,7 @@ export default function AuthPage() {
         </button>
       </div>
       {activeModal && (
-        <div className="flex items-center gap-4 cursor-pointer  fixed top-20  z-60">
+        <div className="flex items-center justify-center gap-4 cursor-pointer md:right-[45%]  fixed top-20 md:top-40  z-60">
           <PackageCheck className="h-8 w-8 text-indigo-500" />
           <h1 className="text-4xl font-bold text-white">InStock</h1>
         </div>
