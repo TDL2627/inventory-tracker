@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
-import { signIn, signUp, getUser } from "../app/utils/auth";
+import { signIn, signUp, getUser, getUserByEmail } from "../app/utils/auth";
 import { useRouter } from "next/router";
 import { Store, User, PackageCheck } from "lucide-react";
 import toast from "react-hot-toast";
+import { useUserStore } from "../app/stores/user";
 
 export default function AuthPage() {
   const router = useRouter();
   const [activeModal, setActiveModal] = useState(null);
+  const { setUser } = useUserStore();
 
   useEffect(() => {
     if (router.isReady) {
@@ -33,36 +35,35 @@ export default function AuthPage() {
 
   const handleSignup = async () => {
     try {
+      if (signupData.role === "teller") {
+        const owner = await getUserByEmail(signupData.ownerEmail);
+        if (!owner) {
+          toast.error("Owner not found. Please check the email.");
+          return; // Stop execution if no owner found
+        }
+      }
       await signUp(
         signupData.email,
         signupData.password,
         signupData.role,
         signupData.name
       );
-
+      setUser(signupData);
       toast.success("Signed up! 🎉");
       closeModal();
-      if (signupData.role === "teller") {
-        router.push("/tellers");
-      } else {
-        router.push("/dashboard");
-      }
+      router.push(signupData.role === "teller" ? "/tellers" : "/dashboard");
     } catch (err) {
-      toast.error(err.message || "Signup failed");
+      toast.error("Signup failed");
     }
   };
-
   const handleLogin = async () => {
     try {
       await signIn(loginData.email, loginData.password);
       const user = await getUser();
-      
+      setUser(user);
+
       toast.success("Logged in! 👏");
-      if (user.role === "teller") {
-        router.push("/tellers");
-      } else {
-        router.push("/dashboard");
-      }
+      router.push(user.role === "teller" ? "/tellers" : "/dashboard");
 
       closeModal();
     } catch (err) {
@@ -81,13 +82,13 @@ export default function AuthPage() {
       <div className="flex gap-4">
         <button
           onClick={() => setActiveModal("signup")}
-          className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-md text-sm font-medium"
+          className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-md text-sm font-medium cursor-pointer"
         >
           Sign Up
         </button>
         <button
           onClick={() => setActiveModal("login")}
-          className="px-5 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-medium"
+          className="px-5 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-medium cursor-pointer"
         >
           Login
         </button>

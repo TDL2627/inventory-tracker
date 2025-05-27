@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import {useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { logOut, getUser } from "../utils/auth";
+import { logOut } from "../utils/auth";
 import { toast } from "react-hot-toast";
+import { useUserStore } from "../stores/user";
 import {
   PackageCheck,
   Home,
@@ -15,17 +16,9 @@ import {
 
 const Sidebar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [user, setUser] = useState(null);
+  const user = useUserStore((state) => state.user);
 
   const router = useRouter();
-
-  useEffect(() => {
-    const checkUser = async () => {
-      const user = await getUser();
-      setUser(user);
-    };
-    checkUser();
-  }, [router]);
 
   const goToAuthWithModal = (type) => {
     router.push(`/auth?modal=${type}`);
@@ -75,7 +68,6 @@ const Sidebar = () => {
   // Sidebar for other pages with active state
   return (
     <>
-      <></>
       <div className="lg:hidden p-4 bg-gray-900 flex justify-between items-center">
         <div
           onClick={() => router.push(user ? "/dashboard" : "/")}

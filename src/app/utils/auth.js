@@ -1,4 +1,5 @@
 import { supabase } from "../lib/supabaseClient";
+import { useUserStore } from "../stores/user";
 
 export async function signUp(email, password, role = "teller", name = "") {
   const { data, error } = await supabase.auth.signUp({ email, password });
@@ -42,8 +43,22 @@ export async function getUser() {
 
   return data;
 }
+
+export async function getUserByEmail(email) {
+  const { data, error } = await supabase
+    .from("users")
+    .select("name, role, id")
+    .eq("email", email)
+    .single();
+
+  if (error) throw error;
+
+  return data;
+}
+
 export async function logOut() {
   const { error } = await supabase.auth.signOut();
+
   if (error) throw error;
   return;
 }

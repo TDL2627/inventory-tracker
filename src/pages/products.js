@@ -6,19 +6,20 @@ import {
   updateProduct,
   deleteProduct,
 } from "../app/utils/products";
-import { getUser } from "../app/utils/auth";
 import toast from "react-hot-toast";
 import { useRouter } from "next/router";
+import { useUserStore } from "../app/stores/user";
 
 const ProductPage = () => {
   const [products, setProducts] = useState([]);
   const [activeModal, setActiveModal] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [user, setUser] = useState(null);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5; // You can adjust this
+  const user = useUserStore((state) => state.user);
 
   const router = useRouter();
 
@@ -31,18 +32,7 @@ const ProductPage = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const checkUser = async () => {
-      const user = await getUser();
-      console.log(user, "aye use");
-
-      if (!user) {
-        router.push("/auth");
-      }
-      setUser(user);
-    };
-    checkUser();
-  }, [router]);
+  
 
   const loadProducts = async () => {
     if (!user) return;
