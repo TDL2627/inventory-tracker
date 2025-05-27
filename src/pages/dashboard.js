@@ -16,9 +16,8 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { logOut, getUser } from "../app/utils/auth";
+import { getUser } from "../app/utils/auth";
 import { useRouter } from "next/router";
-import { toast } from "react-hot-toast";
 import { fetchProducts } from "../app/utils/products";
 
 // Sample data for charts and tables
@@ -90,7 +89,6 @@ const inventoryItems = [
 ];
 
 export default function InventoryDashboard() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [products, setProducts] = useState([]);
@@ -149,7 +147,7 @@ export default function InventoryDashboard() {
   }, [products, hasMounted]);
 
   return (
-    <div className="flex h-screen bg-gray-900 text-gray-100 ">
+    <div className="flex h-full bg-gray-900 text-gray-100 ">
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Dashboard Content */}
@@ -298,123 +296,7 @@ export default function InventoryDashboard() {
           </div>
 
           {/* Inventory Table */}
-          <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
-            <div className="p-6 border-b border-gray-700">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                <h2 className="text-lg font-medium text-white mb-4 md:mb-0">
-                  Inventory Items
-                </h2>
-                <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Search className="h-4 w-4 text-gray-400" />
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Search items..."
-                      className="pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-sm text-gray-300 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 w-full md:w-auto"
-                    />
-                  </div>
-                  <button className="flex items-center justify-center px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-sm text-gray-300 hover:bg-gray-600">
-                    <Filter className="h-4 w-4 mr-2" />
-                    Filter
-                  </button>
-                  <button className="flex items-center justify-center px-4 py-2 bg-indigo-600 rounded-md text-sm font-medium text-white hover:bg-indigo-500">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Item
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-700">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Product Name
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      SKU
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Category
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Stock
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Price
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-700">
-                  {inventoryItems.map((item) => (
-                    <tr key={item.id} className="hover:bg-gray-750">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
-                        {item.name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                        {item.sku}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                        {item.category}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                        {item.stock}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                        ${item.price}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-2 py-1 text-xs font-medium rounded-full ${
-                            item.status === "In Stock"
-                              ? "bg-green-100 text-green-800"
-                              : item.status === "Low Stock"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
-                        >
-                          {item.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                        <button className="text-indigo-400 hover:text-indigo-300">
-                          Edit
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="bg-gray-800 px-6 py-4 border-t border-gray-700">
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-400">
-                  Showing <span className="font-medium">1</span> to{" "}
-                  <span className="font-medium">6</span> of{" "}
-                  <span className="font-medium">24</span> results
-                </div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    className="px-3 py-1 bg-gray-700 border border-gray-600 rounded-md text-sm text-gray-300 hover:bg-gray-600 disabled:opacity-50"
-                    disabled
-                  >
-                    Previous
-                  </button>
-                  <button className="px-3 py-1 bg-indigo-600 rounded-md text-sm font-medium text-white hover:bg-indigo-500">
-                    Next
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+         
         </main>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Plus, Minus, ShoppingCart, Calculator, X, Search } from 'lucide-react';
 
 const TellerPage = () => {
@@ -60,7 +60,7 @@ const TellerPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="h-full bg-gray-900 text-white mt-10">
       <div className="container mx-auto px-4 py-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">

@@ -21,8 +21,6 @@ const ProductPage = () => {
   const itemsPerPage = 5; // You can adjust this
   const user = useUserStore((state) => state.user);
 
-  const router = useRouter();
-
   const [productForm, setProductForm] = useState({
     name: "",
     category: "",
@@ -31,8 +29,6 @@ const ProductPage = () => {
     imageFile: null,
   });
   const [isLoading, setIsLoading] = useState(false);
-
-  
 
   const loadProducts = async () => {
     if (!user) return;
@@ -214,7 +210,7 @@ const ProductPage = () => {
     });
   };
   return (
-    <div className="flex flex-col min-h-screen bg-gray-900 text-gray-200">
+    <div className="flex flex-col h-full bg-gray-900 text-gray-200">
       {/* Header */}
       <header className="">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -263,103 +259,110 @@ const ProductPage = () => {
         ) : (
           <div className="bg-gray-800 shadow overflow-hidden sm:rounded-lg border border-gray-700">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-700">
+              <table className="w-full">
                 <thead className="bg-gray-700">
                   <tr>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
-                    >
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                       ID
                     </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
-                    >
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                       Name
                     </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
-                    >
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                       Category
                     </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
-                    >
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                       Price
                     </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
-                    >
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                       Quantity
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      Status
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                       Image
                     </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
-                    >
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-gray-800 divide-y divide-gray-700">
+                <tbody className="divide-y divide-gray-700">
                   {paginatedProducts.length > 0 ? (
-                    paginatedProducts.map((product) => (
-                      <tr key={product.id} className="hover:bg-gray-600">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                          {product.id}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300">
-                          {product.name}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 capitalize">
-                          {product.category}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                          R{product.price?.toFixed(2)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                          {product.quantity}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {product.image_url ? (
-                            <img
-                              src={product.image_url}
-                              alt={product.name}
-                              className="h-12 w-12 object-cover rounded"
-                            />
-                          ) : (
-                            <span className="text-gray-400 text-sm">
-                              No Image
-                            </span>
-                          )}
-                        </td>
+                    paginatedProducts.map((product) => {
+                      const status =
+                        product.quantity === 0
+                          ? "Out of Stock"
+                          : product.quantity < 10
+                          ? "Low Stock"
+                          : "In Stock";
 
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <button
-                            onClick={() => openEditModal(product)}
-                            className="text-indigo-400 hover:text-indigo-300 mr-4 cursor-pointer"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => openDeleteModal(product)}
-                            className="text-red-400 hover:text-red-300 cursor-pointer"
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))
+                      const statusColor =
+                        status === "In Stock"
+                          ? "bg-green-100 text-green-800"
+                          : status === "Low Stock"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-red-100 text-red-800";
+
+                      return (
+                        <tr key={product.id} className="hover:bg-gray-750">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                            {product.id}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
+                            {product.name}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                            {product.category}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                            R{product.price?.toFixed(2)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                            {product.quantity}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span
+                              className={`px-2 py-1 text-xs font-medium rounded-full ${statusColor}`}
+                            >
+                              {status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {product.image_url ? (
+                              <img
+                                src={product.image_url}
+                                alt={product.name}
+                                className="h-12 w-12 object-cover rounded"
+                              />
+                            ) : (
+                              <span className="text-gray-400 text-sm">
+                                No Image
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                            <button
+                              onClick={() => openEditModal(product)}
+                              className="text-indigo-400 hover:text-indigo-300 mr-4"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => openDeleteModal(product)}
+                              className="text-red-400 hover:text-red-300"
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
                   ) : (
                     <tr>
                       <td
-                        colSpan="6"
+                        colSpan="8"
                         className="px-6 py-4 text-center text-sm text-gray-400"
                       >
                         No products found. Add a new product to get started.
