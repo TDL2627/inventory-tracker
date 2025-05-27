@@ -46,7 +46,8 @@ export default function AuthPage() {
         signupData.email,
         signupData.password,
         signupData.role,
-        signupData.name
+        signupData.name,
+        signupData.ownerEmail
       );
       setUser(signupData);
       toast.success("Signed up! 🎉");

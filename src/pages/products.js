@@ -7,7 +7,6 @@ import {
   deleteProduct,
 } from "../app/utils/products";
 import toast from "react-hot-toast";
-import { useRouter } from "next/router";
 import { useUserStore } from "../app/stores/user";
 
 const ProductPage = () => {
@@ -33,7 +32,7 @@ const ProductPage = () => {
   const loadProducts = async () => {
     if (!user) return;
     setIsLoading(true);
-    const { data, error } = await fetchProducts(user.id);
+    const { data, error } = await fetchProducts(user.email);
 
     if (error) {
       console.error("Error fetching products:", error);
@@ -91,7 +90,7 @@ const ProductPage = () => {
         quantity: parseInt(productForm.quantity),
         image_url: imageUrl,
       },
-      user?.id
+      user?.email
     );
 
     if (error) {

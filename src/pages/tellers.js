@@ -1,31 +1,40 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Plus, Minus, ShoppingCart, Calculator, X, Search } from 'lucide-react';
+import { fetchProducts } from '../app/utils/products'; // Make sure path is correct
+import { useUserStore } from '../app/stores/user';
+import toast from 'react-hot-toast';
 
 const TellerPage = () => {
-  const [products] = useState([
-    { id: 1, name: 'Coffee', price: 3.50, category: 'Beverages' },
-    { id: 2, name: 'Croissant', price: 2.25, category: 'Bakery' },
-    { id: 3, name: 'Sandwich', price: 8.75, category: 'Food' },
-    { id: 4, name: 'Tea', price: 2.50, category: 'Beverages' },
-    { id: 5, name: 'Muffin', price: 3.00, category: 'Bakery' },
-    { id: 6, name: 'Salad', price: 9.50, category: 'Food' },
-    { id: 7, name: 'Juice', price: 4.00, category: 'Beverages' },
-    { id: 8, name: 'Bagel', price: 2.75, category: 'Bakery' },
-  ]);
-  
+ const user = useUserStore((state) => state.user);
+  const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
-  
+  useEffect(() => {
+    const loadProducts = async () => {
+        console.log("Loading products for user:", user);
+        
+      if (!user?.ownerEmail) return;
+      const { data, error } = await fetchProducts(user.ownerEmail); // assuming fetchProducts supports email now
+      if (error) {
+        toast.error("Failed to load products");
+        console.error("Fetch products error:", error);
+      } else {
+        setProducts(data);
+      }
+    };
+    loadProducts();
+  }, [user]);
+
   const categories = ['All', ...new Set(products.map(p => p.category))];
-  
+
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
-  
+
   const addToCart = (product) => {
     const existingItem = cart.find(item => item.id === product.id);
     if (existingItem) {
@@ -38,7 +47,7 @@ const TellerPage = () => {
       setCart([...cart, { ...product, quantity: 1 }]);
     }
   };
-  
+
   const updateQuantity = (id, change) => {
     setCart(cart.map(item => {
       if (item.id === id) {
@@ -48,13 +57,13 @@ const TellerPage = () => {
       return item;
     }).filter(item => item.quantity > 0));
   };
-  
+
   const removeFromCart = (id) => {
     setCart(cart.filter(item => item.id !== id));
   };
-  
+
   const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  
+
   const clearCart = () => {
     setCart([]);
   };
@@ -118,7 +127,7 @@ const TellerPage = () => {
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-2xl font-bold text-green-400">
-                      ${product.price.toFixed(2)}
+                      R{product.price.toFixed(2)}
                     </span>
                     <Plus className="w-5 h-5 text-blue-400" />
                   </div>
@@ -190,7 +199,7 @@ const TellerPage = () => {
                 {/* Total */}
                 <div className="flex justify-between text-xl font-bold mb-6">
                   <span>Total:</span>
-                  <span className="text-green-400">${total.toFixed(2)}</span>
+                  <span className="text-green-400">R{total.toFixed(2)}</span>
                 </div>
 
                 {/* Checkout Button */}

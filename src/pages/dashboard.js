@@ -1,12 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  BarChart3,
-  PackageCheck,
-  Search,
-  ShoppingCart,
-  Plus,
-  Filter,
-} from "lucide-react";
+import { BarChart3, PackageCheck, ShoppingCart } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -19,6 +12,7 @@ import {
 import { getUser } from "../app/utils/auth";
 import { useRouter } from "next/router";
 import { fetchProducts } from "../app/utils/products";
+import { useUserStore } from "../app/stores/user";
 
 // Sample data for charts and tables
 const stockData = [
@@ -31,66 +25,9 @@ const stockData = [
   { name: "Jul", value: 1100 },
 ];
 
-const inventoryItems = [
-  {
-    id: 1,
-    name: "Office Chair",
-    sku: "FRN-001",
-    category: "Furniture",
-    stock: 24,
-    price: 249.99,
-    status: "In Stock",
-  },
-  {
-    id: 2,
-    name: "Wireless Keyboard",
-    sku: "ELC-032",
-    category: "Electronics",
-    stock: 15,
-    price: 59.99,
-    status: "In Stock",
-  },
-  {
-    id: 3,
-    name: "Desk Lamp",
-    sku: "LGT-103",
-    category: "Lighting",
-    stock: 8,
-    price: 34.99,
-    status: "Low Stock",
-  },
-  {
-    id: 4,
-    name: "Monitor Stand",
-    sku: "FRN-089",
-    category: "Furniture",
-    stock: 0,
-    price: 79.99,
-    status: "Out of Stock",
-  },
-  {
-    id: 5,
-    name: "USB Hub",
-    sku: "ELC-217",
-    category: "Electronics",
-    stock: 32,
-    price: 25.99,
-    status: "In Stock",
-  },
-  {
-    id: 6,
-    name: "Wireless Mouse",
-    sku: "ELC-045",
-    category: "Electronics",
-    stock: 5,
-    price: 29.99,
-    status: "Low Stock",
-  },
-];
-
-export default function InventoryDashboard() {
+export default function Dashboard() {
   const router = useRouter();
-  const [user, setUser] = useState(null);
+  const user = useUserStore((state) => state.user);
   const [products, setProducts] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
   const [lowStockCount, setLowStockCount] = useState(0);
@@ -98,23 +35,12 @@ export default function InventoryDashboard() {
 
   const [hasMounted, setHasMounted] = useState(false);
 
-  useEffect(() => {
-    const checkUser = async () => {
-      const user = await getUser();
 
-      if (!user || user.role !== "owner") {
-        router.push("/auth");
-      } 
-      setUser(user);
-    };
-    checkUser();
-  }, [router]);
 
   const loadProducts = async () => {
     if (!user) return;
 
-    const { data, error } = await fetchProducts(user.id);
-    console.log("Fetched products:", data);
+    const { data, error } = await fetchProducts(user.email);
 
     if (error) {
       console.error("Error fetching products:", error);
@@ -296,7 +222,6 @@ export default function InventoryDashboard() {
           </div>
 
           {/* Inventory Table */}
-         
         </main>
       </div>
     </div>

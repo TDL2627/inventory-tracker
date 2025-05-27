@@ -1,11 +1,12 @@
 import { supabase } from "../lib/supabaseClient";
 
 // Fetch all products
-export const fetchProducts = async (userId) => {
+export const fetchProducts = async (email) => {
+  
   const { data, error } = await supabase
     .from("products")
     .select("*")
-    .eq("ownerId", userId);
+    .eq("ownerEmail", email);
 
   return { data, error };
 };
@@ -30,12 +31,10 @@ export const uploadProductImage = async (imageFile) => {
 };
 
 // Add new product
-export const addProduct = async (product, userId) => {
-  console.log("Adding product:", product, "for user:", userId);
-  
+export const addProduct = async (product, email) => {  
   const productWithOwner = {
     ...product,
-    ownerId: userId,
+    ownerEmail: email,
   };
   return await supabase.from("products").insert([productWithOwner]);
 };
