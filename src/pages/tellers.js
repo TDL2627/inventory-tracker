@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Plus, Minus, ShoppingCart, Calculator, X, Search } from "lucide-react";
-import { fetchProducts } from "../app/utils/products"; 
+import { fetchProducts } from "../app/utils/products";
 import { useUserStore } from "../app/stores/user";
 import toast from "react-hot-toast";
 
@@ -11,13 +11,14 @@ const TellerPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
+  const [isCartModalOpen, setIsCartModalOpen] = useState(false);
 
   useEffect(() => {
     const loadProducts = async () => {
       console.log("Loading products for user:", user);
 
       if (!user?.ownerEmail) return;
-      const { data, error } = await fetchProducts(user.ownerEmail); 
+      const { data, error } = await fetchProducts(user.ownerEmail);
       if (error) {
         toast.error("Failed to load products");
         console.error("Fetch products error:", error);
@@ -39,7 +40,7 @@ const TellerPage = () => {
     return matchesSearch && matchesCategory;
   });
 
-  const itemsPerPage = 5; 
+  const itemsPerPage = 5;
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
   const paginatedProducts = filteredProducts.slice(
@@ -104,6 +105,84 @@ const TellerPage = () => {
     setCart([]);
   };
 
+  const CartComponent = () => (
+    <>
+      <div className="flex justify-between items-center my-10">
+        <h2 className="text-xl font-bold">Current Order</h2>
+        {cart.length > 0 && (
+          <button
+            onClick={clearCart}
+            className="text-red-400 hover:text-red-300 text-sm font-medium cursor-pointer"
+          >
+            Clear All
+          </button>
+        )}
+      </div>
+
+      {/* Cart Items */}
+      <div className="space-y-3 mb-6 max-h-92 overflow-y-auto">
+        {cart.length === 0 ? (
+          <p className="text-gray-400 text-center py-8">
+            No items in cart
+          </p>
+        ) : (
+          cart.map((item) => (
+            <div key={item.id} className="bg-gray-700 rounded-lg p-3">
+              <div className="flex justify-between items-start mb-2">
+                <span className="font-medium">{item.name}</span>
+                <button
+                  onClick={() => removeFromCart(item.id)}
+                  className="text-red-400 hover:text-red-300 cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="flex justify-between items-center">
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => updateQuantity(item.id, -1)}
+                    className="bg-gray-600 hover:bg-gray-500 rounded p-1"
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <span className="px-3 py-1 bg-gray-600 rounded min-w-[3rem] text-center">
+                    {item.quantity}
+                  </span>
+                  <button
+                    onClick={() => updateQuantity(item.id, 1)}
+                    className="bg-gray-600 hover:bg-gray-500 rounded p-1"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+                <span className="font-bold text-green-400">
+                  R{(item.price * item.quantity).toFixed(2)}
+                </span>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Calculations */}
+      {cart.length > 0 && (
+        <div className="border-t border-gray-600 pt-4">
+          {/* Total */}
+          <div className="flex justify-between text-xl font-bold mb-6">
+            <span>Total:</span>
+            <span className="text-green-400">R{total.toFixed(2)}</span>
+          </div>
+
+          {/* Checkout Button */}
+          <button className="w-full cursor-pointer bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg transition-colors">
+            Process Payment
+          </button>
+        </div>
+      )}
+    </>
+  );
+
+
   return (
     <div className="h-full bg-gray-900 text-white mt-10">
       <div className="container mx-auto px-4 py-6">
@@ -111,12 +190,15 @@ const TellerPage = () => {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-3">
             <Calculator className="w-8 h-8 text-blue-400" />
-            <h1 className="text-3xl font-bold">Point of Sale</h1>
+            <h1 className="text-3xl font-bold">{user?.name}</h1>
           </div>
-          <div className="flex items-center space-x-2 bg-gray-800 px-4 py-2 rounded-lg">
+          <button
+            onClick={() => setIsCartModalOpen(true)}
+            className="flex items-center space-x-2 bg-gray-800 px-4 py-2 rounded-lg lg:hidden"
+          >
             <ShoppingCart className="w-5 h-5 text-green-400" />
             <span className="text-lg font-semibold">{cart.length} items</span>
-          </div>
+          </button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -204,7 +286,7 @@ const TellerPage = () => {
                             toast.error("Out of stock");
                           }
                         }}
-                        className="bg-blue-600  hover:bg-blue-700 text-white font-bold h-10 py-2 px-4 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                        className="bg-blue-600 cursor-pointer disabled:cursor-not-allowed hover:bg-blue-700 text-white font-bold h-10 py-2 px-4 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
                       >
                         Add to Cart
                       </button>
@@ -217,7 +299,7 @@ const TellerPage = () => {
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
-                className="px-3 py-1 border rounded disabled:opacity-50"
+                className="px-3 py-1 border rounded disabled:opacity-50 cursor-pointer"
               >
                 Previous
               </button>
@@ -229,89 +311,33 @@ const TellerPage = () => {
                   setCurrentPage((prev) => Math.min(totalPages, prev + 1))
                 }
                 disabled={currentPage === totalPages}
-                className="px-3 py-1 border rounded disabled:opacity-50"
+                className="px-3 py-1 border rounded disabled:opacity-50 cursor-pointer"
               >
                 Next
               </button>
             </div>
           </div>
 
-          {/* Cart & Calculations */}
-          <div className="bg-gray-800 rounded-xl p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold">Current Order</h2>
-              {cart.length > 0 && (
-                <button
-                  onClick={clearCart}
-                  className="text-red-400 hover:text-red-300 text-sm font-medium"
-                >
-                  Clear All
-                </button>
-              )}
-            </div>
-
-            {/* Cart Items */}
-            <div className="space-y-3 mb-6 max-h-60 overflow-y-auto">
-              {cart.length === 0 ? (
-                <p className="text-gray-400 text-center py-8">
-                  No items in cart
-                </p>
-              ) : (
-                cart.map((item) => (
-                  <div key={item.id} className="bg-gray-700 rounded-lg p-3">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="font-medium">{item.name}</span>
-                      <button
-                        onClick={() => removeFromCart(item.id)}
-                        className="text-red-400 hover:text-red-300"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => updateQuantity(item.id, -1)}
-                          className="bg-gray-600 hover:bg-gray-500 rounded p-1"
-                        >
-                          <Minus className="w-4 h-4" />
-                        </button>
-                        <span className="px-3 py-1 bg-gray-600 rounded min-w-[3rem] text-center">
-                          {item.quantity}
-                        </span>
-                        <button
-                          onClick={() => updateQuantity(item.id, 1)}
-                          className="bg-gray-600 hover:bg-gray-500 rounded p-1"
-                        >
-                          <Plus className="w-4 h-4" />
-                        </button>
-                      </div>
-                      <span className="font-bold text-green-400">
-                        R{(item.price * item.quantity).toFixed(2)}
-                      </span>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {/* Calculations */}
-            {cart.length > 0 && (
-              <div className="border-t border-gray-600 pt-4">
-                {/* Total */}
-                <div className="flex justify-between text-xl font-bold mb-6">
-                  <span>Total:</span>
-                  <span className="text-green-400">R{total.toFixed(2)}</span>
-                </div>
-
-                {/* Checkout Button */}
-                <button className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg transition-colors">
-                  Process Payment
-                </button>
-              </div>
-            )}
+          {/* Cart & Calculations - Desktop */}
+          <div className="hidden md:block bg-gray-800 rounded-xl p-6">
+            <CartComponent />
           </div>
         </div>
+
+        {/* Cart Modal for Mobile */}
+        {isCartModalOpen && (
+          <div className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40 flex justify-center items-start pt-10">
+            <div className="bg-gray-800 rounded-lg shadow-xl w-11/12 max-w-lg p-6 relative">
+              <button
+                onClick={() => setIsCartModalOpen(false)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-white"
+              >
+                <X className="w-6 h-6" />
+              </button>
+              <CartComponent />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
