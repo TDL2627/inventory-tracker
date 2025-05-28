@@ -12,8 +12,6 @@ export const fetchOrders = async (ownerEmail) => {
 
 // Add a new order
 export const addOrder = async (order) => {
-    console.log("Adding order:", order);
-    
   return await supabase.from("orders").insert([order]);
 };
 
