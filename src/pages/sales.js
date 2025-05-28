@@ -246,6 +246,12 @@ const SalesPage = () => {
                     {selectedOrder.paymentMethod}
                   </span>
                 </p>
+                    <p>
+                  <strong>Teller Name:</strong>{" "}
+                  <span className="text-gray-400">
+                    {selectedOrder.teller}
+                  </span>
+                </p>
                 <p>
                   <strong>Total:</strong>{" "}
                   <span className="text-gray-400">
