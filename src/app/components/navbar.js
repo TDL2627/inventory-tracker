@@ -79,7 +79,7 @@ const Sidebar = () => {
             toast.success("Logged out successfully");
             router.push(`/`);
           }}
-          className="flex items-center text-gray-400 hover:text-white"
+          className="flex items-center text-gray-400 hover:text-white cursor-pointer"
         >
           <LogOut className="w-5 h-5 mr-2" />
           Log Out
@@ -176,7 +176,7 @@ const Sidebar = () => {
 
                   {/* Example Sales link (no route provided, so no active) */}
                    <Link
-                    href="#"
+                    href="/sales"
                     className="flex items-center px-4 py-2 text-gray-400 hover:text-gray-100 hover:bg-gray-700 rounded-md"
                   >
                     <ShoppingCart className="w-5 h-5 mr-3" />

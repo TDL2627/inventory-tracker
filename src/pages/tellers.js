@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Plus, Minus, ShoppingCart, Calculator, X, Search } from "lucide-react";
-import { fetchProducts } from "../app/utils/products";
+import { fetchProducts,updateProduct } from "../app/utils/products";
 import { useUserStore } from "../app/stores/user";
 import toast from "react-hot-toast";
+import { addOrder } from "@/app/utils/orders";
 
 const TellerPage = () => {
   const user = useUserStore((state) => state.user);
@@ -12,20 +13,21 @@ const TellerPage = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const [isCartModalOpen, setIsCartModalOpen] = useState(false);
+  const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("cash");
+  const [cardFee, setCardFee] = useState(0);
 
+  const loadProducts = async () => {
+    if (!user?.ownerEmail) return;
+    const { data, error } = await fetchProducts(user.ownerEmail);
+    if (error) {
+      toast.error("Failed to load products");
+      console.error("Fetch products error:", error);
+    } else {
+      setProducts(data);
+    }
+  };
   useEffect(() => {
-    const loadProducts = async () => {
-      console.log("Loading products for user:", user);
-
-      if (!user?.ownerEmail) return;
-      const { data, error } = await fetchProducts(user.ownerEmail);
-      if (error) {
-        toast.error("Failed to load products");
-        console.error("Fetch products error:", error);
-      } else {
-        setProducts(data);
-      }
-    };
     loadProducts();
   }, [user]);
 
@@ -50,7 +52,6 @@ const TellerPage = () => {
 
   const addToCart = (product) => {
     const existingItem = cart.find((item) => item.id === product.id);
-
     if (existingItem) {
       if (existingItem.quantity < product.quantity) {
         setCart(
@@ -95,14 +96,98 @@ const TellerPage = () => {
       })
     );
   };
+
   const removeFromCart = (id) => {
     setCart(cart.filter((item) => item.id !== id));
   };
 
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const subtotal = cart.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+
+  useEffect(() => {
+    if (paymentMethod === "card") {
+      if (subtotal > 0 && subtotal <= 50) {
+        setCardFee(3);
+      } else if (subtotal > 50) {
+        // R3 base fee + R5 for each R100
+        const additionalFee = Math.floor(subtotal / 100) * 5;
+        setCardFee(additionalFee);
+      } else {
+        setCardFee(0);
+      }
+    } else {
+      setCardFee(0);
+    }
+  }, [subtotal, paymentMethod]);
+
+  const finalTotal = subtotal + cardFee;
 
   const clearCart = () => {
     setCart([]);
+    setPaymentMethod("cash"); 
+  };
+
+  const handleProcessPayment = () => {
+    if (cart.length > 0) {
+      setIsCheckoutModalOpen(true);
+    } else {
+      toast.error("Your cart is empty");
+    }
+  };
+
+  const handleConfirmCheckout = async () => {
+    const toastId = toast.loading("Processing transaction...");
+
+    const updatePromises = cart.map((item) => {
+      const newQuantity = item.maxQuantity - item.quantity;
+      return updateProduct(item.id, { quantity: newQuantity });
+    });
+
+    try {
+      const results = await Promise.all(updatePromises);
+
+      const failedUpdate = results.find((result) => result.error);
+      if (failedUpdate) {
+        throw new Error(
+          failedUpdate.error.message || "An unknown database error occurred."
+        );
+      }
+
+     const orderItems = cart.map((item) => ({
+      productId: item.id,
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity,
+    }));
+
+    const newOrder = {
+      totalAmount: finalTotal,
+      cardFee: cardFee,
+      paymentMethod: paymentMethod,
+      items: orderItems, 
+      teller: user.name,
+      ownerEmail: user.ownerEmail,
+    };
+
+    const { error: orderError } = await addOrder(newOrder);
+
+    if (orderError) {
+      throw new Error(
+        orderError.message || "An unknown database error occurred during order creation."
+      );
+    }
+
+      toast.success("Payment Successful!", { id: toastId });
+
+      setIsCheckoutModalOpen(false);
+      clearCart();
+      await loadProducts(); 
+    } catch (error) {
+      toast.error(`Checkout failed: ${error.message}`, { id: toastId });
+      await loadProducts();
+    } 
   };
 
   const CartComponent = () => (
@@ -122,9 +207,7 @@ const TellerPage = () => {
       {/* Cart Items */}
       <div className="space-y-3 mb-6 max-h-92 overflow-y-auto">
         {cart.length === 0 ? (
-          <p className="text-gray-400 text-center py-8">
-            No items in cart
-          </p>
+          <p className="text-gray-400 text-center py-8">No items in cart</p>
         ) : (
           cart.map((item) => (
             <div key={item.id} className="bg-gray-700 rounded-lg p-3">
@@ -167,14 +250,47 @@ const TellerPage = () => {
       {/* Calculations */}
       {cart.length > 0 && (
         <div className="border-t border-gray-600 pt-4">
+          {/* Payment Method */}
+          <div className="flex justify-between items-center mb-4">
+            <label htmlFor="paymentMethod" className="text-lg font-medium">
+              Payment Method
+            </label>
+            <select
+              id="paymentMethod"
+              value={paymentMethod}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+              className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-1.5 text-white focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="cash">Cash</option>
+              <option value="card">Card</option>
+            </select>
+          </div>
+
+          {/* Subtotal */}
+          <div className="flex justify-between text-md mb-2">
+            <span>Subtotal:</span>
+            <span>R{subtotal.toFixed(2)}</span>
+          </div>
+
+          {/* Card Fee */}
+          {paymentMethod === "card" && (
+            <div className="flex justify-between text-md mb-2">
+              <span>Card Fee:</span>
+              <span className="text-orange-400">R{cardFee.toFixed(2)}</span>
+            </div>
+          )}
+
           {/* Total */}
-          <div className="flex justify-between text-xl font-bold mb-6">
+          <div className="flex justify-between text-xl font-bold my-4">
             <span>Total:</span>
-            <span className="text-green-400">R{total.toFixed(2)}</span>
+            <span className="text-green-400">R{finalTotal.toFixed(2)}</span>
           </div>
 
           {/* Checkout Button */}
-          <button className="w-full cursor-pointer bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg transition-colors">
+          <button
+            onClick={handleProcessPayment}
+            className="w-full cursor-pointer bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg transition-colors"
+          >
             Process Payment
           </button>
         </div>
@@ -182,6 +298,62 @@ const TellerPage = () => {
     </>
   );
 
+  const CheckoutConfirmationModal = () => (
+    <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex justify-center items-center">
+      <div className="bg-gray-800 rounded-lg shadow-xl w-11/12 max-w-md p-6">
+        <h2 className="text-2xl font-bold mb-6 text-center">Confirm Order</h2>
+        <div className="space-y-2 mb-6">
+          {/* Itemized List */}
+          <div className="max-h-48 overflow-y-auto pr-2">
+            {cart.map((item) => (
+              <div key={item.id} className="flex justify-between py-1">
+                <span>
+                  {item.name} x {item.quantity}
+                </span>
+                <span className="font-mono">
+                  R{(item.price * item.quantity).toFixed(2)}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <div className="border-t border-gray-600 my-2 pt-2"></div>
+          {/* Financial Summary */}
+          <div className="flex justify-between font-semibold">
+            <span>Subtotal:</span>
+            <span className="font-mono">R{subtotal.toFixed(2)}</span>
+          </div>
+          {paymentMethod === "card" && (
+            <div className="flex justify-between font-semibold">
+              <span>Card Fee:</span>
+              <span className="font-mono text-orange-400">
+                R{cardFee.toFixed(2)}
+              </span>
+            </div>
+          )}
+          <div className="border-t border-gray-600 my-2 pt-2"></div>
+          <div className="flex justify-between text-2xl font-bold text-green-400">
+            <span>Total:</span>
+            <span className="font-mono">R{finalTotal.toFixed(2)}</span>
+          </div>
+        </div>
+        <div className="flex justify-end gap-4 mt-8">
+          <button
+            onClick={() => setIsCheckoutModalOpen(false)}
+            className=" cursor-pointer px-6 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg font-medium"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleConfirmCheckout}
+            className=" cursor-pointer px-6 py-2 bg-green-600 hover:bg-green-500 rounded-lg font-bold"
+          >
+            Confirm & Pay
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="h-full bg-gray-900 text-white mt-10">
@@ -319,14 +491,14 @@ const TellerPage = () => {
           </div>
 
           {/* Cart & Calculations - Desktop */}
-          <div className="hidden md:block bg-gray-800 rounded-xl p-6">
+          <div className="hidden lg:block bg-gray-800 rounded-xl p-6">
             <CartComponent />
           </div>
         </div>
 
         {/* Cart Modal for Mobile */}
         {isCartModalOpen && (
-          <div className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40 flex justify-center items-start pt-10">
+          <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40 flex justify-center items-start pt-10">
             <div className="bg-gray-800 rounded-lg shadow-xl w-11/12 max-w-lg p-6 relative">
               <button
                 onClick={() => setIsCartModalOpen(false)}
@@ -338,6 +510,9 @@ const TellerPage = () => {
             </div>
           </div>
         )}
+
+        {/* Checkout Confirmation Modal */}
+        {isCheckoutModalOpen && <CheckoutConfirmationModal />}
       </div>
     </div>
   );
