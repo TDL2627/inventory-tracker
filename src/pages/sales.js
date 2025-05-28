@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { fetchOrders } from "../app/utils/orders"; // Import your fetchOrders utility
 import { useUserStore } from "../app/stores/user";
 import toast from "react-hot-toast";
-import { CalendarDays, Receipt, X, ListOrdered } from "lucide-react";
+import { CalendarDays, X, ListOrdered } from "lucide-react";
 
 const SalesPage = () => {
   const user = useUserStore((state) => state.user);
@@ -24,8 +24,6 @@ const SalesPage = () => {
       setLoading(false);
       return;
     }
-    console.log(user, "Loading orders for user email:", user.email);
-
     const { data, error } = await fetchOrders(user.email);
     if (error) {
       toast.error("Failed to load sales data.");
@@ -39,14 +37,13 @@ const SalesPage = () => {
 
   useEffect(() => {
     loadOrders();
-  }, [user]); // Reload orders when user changes (e.g., on login)
+  }, [user]);
 
   const handleViewDetails = (order) => {
     setSelectedOrder(order);
     setIsOrderDetailsModalOpen(true);
   };
 
-  // Helper function to check if a date is today
   const isToday = (someDate) => {
     const today = new Date();
     return (
