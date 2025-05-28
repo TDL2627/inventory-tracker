@@ -1,22 +1,23 @@
-import { useEffect, useState } from 'react';
-import { Plus, Minus, ShoppingCart, Calculator, X, Search } from 'lucide-react';
-import { fetchProducts } from '../app/utils/products'; // Make sure path is correct
-import { useUserStore } from '../app/stores/user';
-import toast from 'react-hot-toast';
+import { useEffect, useState } from "react";
+import { Plus, Minus, ShoppingCart, Calculator, X, Search } from "lucide-react";
+import { fetchProducts } from "../app/utils/products"; 
+import { useUserStore } from "../app/stores/user";
+import toast from "react-hot-toast";
 
 const TellerPage = () => {
- const user = useUserStore((state) => state.user);
+  const user = useUserStore((state) => state.user);
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const loadProducts = async () => {
-        console.log("Loading products for user:", user);
-        
+      console.log("Loading products for user:", user);
+
       if (!user?.ownerEmail) return;
-      const { data, error } = await fetchProducts(user.ownerEmail); // assuming fetchProducts supports email now
+      const { data, error } = await fetchProducts(user.ownerEmail); 
       if (error) {
         toast.error("Failed to load products");
         console.error("Fetch products error:", error);
@@ -27,42 +28,77 @@ const TellerPage = () => {
     loadProducts();
   }, [user]);
 
-  const categories = ['All', ...new Set(products.map(p => p.category))];
+  const categories = ["All", ...new Set(products.map((p) => p.category))];
 
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch = product.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesCategory =
+      selectedCategory === "All" || product.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
+  const itemsPerPage = 5; 
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   const addToCart = (product) => {
-    const existingItem = cart.find(item => item.id === product.id);
+    const existingItem = cart.find((item) => item.id === product.id);
+
     if (existingItem) {
-      setCart(cart.map(item => 
-        item.id === product.id 
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      ));
+      if (existingItem.quantity < product.quantity) {
+        setCart(
+          cart.map((item) =>
+            item.id === product.id
+              ? { ...item, quantity: item.quantity + 1 }
+              : item
+          )
+        );
+      } else {
+        toast.error("Cannot add more than available stock");
+      }
     } else {
-      setCart([...cart, { ...product, quantity: 1 }]);
+      if (product.quantity > 0) {
+        setCart([
+          ...cart,
+          {
+            ...product,
+            quantity: 1, // this is quantity in cart
+            maxQuantity: product.quantity, // total available
+          },
+        ]);
+      } else {
+        toast.error("Product is out of stock");
+      }
     }
   };
 
   const updateQuantity = (id, change) => {
-    setCart(cart.map(item => {
-      if (item.id === id) {
-        const newQuantity = item.quantity + change;
-        return newQuantity > 0 ? { ...item, quantity: newQuantity } : item;
-      }
-      return item;
-    }).filter(item => item.quantity > 0));
+    setCart((prevCart) =>
+      prevCart.map((item) => {
+        if (item.id === id) {
+          const newQty = item.quantity + change;
+          if (newQty < 1) return item; // can't go below 1
+          if (newQty > item.maxQuantity) {
+            toast.error("Exceeds stock");
+            return item;
+          }
+          return { ...item, quantity: newQty };
+        }
+        return item;
+      })
+    );
   };
-
   const removeFromCart = (id) => {
-    setCart(cart.filter(item => item.id !== id));
+    setCart(cart.filter((item) => item.id !== id));
   };
 
-  const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const clearCart = () => {
     setCart([]);
@@ -98,41 +134,105 @@ const TellerPage = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              
+
               {/* Category Filter */}
               <select
                 className="bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
               >
-                {categories.map(category => (
-                  <option key={category} value={category}>{category}</option>
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
                 ))}
               </select>
             </div>
 
             {/* Products Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-              {filteredProducts.map(product => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {paginatedProducts.map((product) => (
                 <div
-                  key={product.id}
-                  className="bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition-colors cursor-pointer border border-gray-600 hover:border-blue-500"
-                  onClick={() => addToCart(product)}
+                  key={product.id} // Assuming each product has a unique ID
+                  className="bg-gray-700 rounded-lg shadow-lg overflow-hidden flex flex-col transform transition-transform duration-200 hover:scale-105 "
                 >
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-semibold text-lg">{product.name}</h3>
-                    <span className="text-sm text-gray-400 bg-gray-600 px-2 py-1 rounded">
+                  <div className="p-4 flex-grow flex flex-col w-full">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-xl font-semibold text-white mb-1">
+                        {product.name}
+                      </h3>
+                      {product.image_url && (
+                        <div className="relative w-full h-10 mt-5 bg-gray-700 flex items-center justify-end">
+                          <img
+                            src={product.image_url}
+                            alt={product.name}
+                            className="max-h-full max-w-full object-contain rounded-lg"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <p className="text-sm text-gray-400 mb-2">
                       {product.category}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-2xl font-bold text-green-400">
-                      R{product.price.toFixed(2)}
-                    </span>
-                    <Plus className="w-5 h-5 text-blue-400" />
+                    </p>
+
+                    <div className="flex items-center mb-4">
+                      <span className="text-gray-300 text-sm mr-2">
+                        Stock:{" "}
+                      </span>
+                      <span
+                        className={
+                          product.quantity > 0
+                            ? "text-green-500 font-medium"
+                            : "text-red-500 font-medium"
+                        }
+                      >
+                        {product.quantity}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between mt-auto pt-2">
+                      <span className="text-2xl font-bold text-white">
+                        R{product.price.toFixed(2)}
+                      </span>
+                      <button
+                        onClick={() => {
+                          if (product.quantity > 0) {
+                            addToCart(product);
+                            toast.success(`${product.name} added to cart!`);
+                          } else {
+                            toast.error("Out of stock");
+                          }
+                        }}
+                        className="bg-blue-600  hover:bg-blue-700 text-white font-bold h-10 py-2 px-4 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                      >
+                        Add to Cart
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
+            </div>
+            <div className="flex justify-between items-center mt-6">
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1 border rounded disabled:opacity-50"
+              >
+                Previous
+              </button>
+              <span>
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                }
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 border rounded disabled:opacity-50"
+              >
+                Next
+              </button>
             </div>
           </div>
 
@@ -153,9 +253,11 @@ const TellerPage = () => {
             {/* Cart Items */}
             <div className="space-y-3 mb-6 max-h-60 overflow-y-auto">
               {cart.length === 0 ? (
-                <p className="text-gray-400 text-center py-8">No items in cart</p>
+                <p className="text-gray-400 text-center py-8">
+                  No items in cart
+                </p>
               ) : (
-                cart.map(item => (
+                cart.map((item) => (
                   <div key={item.id} className="bg-gray-700 rounded-lg p-3">
                     <div className="flex justify-between items-start mb-2">
                       <span className="font-medium">{item.name}</span>
@@ -185,7 +287,7 @@ const TellerPage = () => {
                         </button>
                       </div>
                       <span className="font-bold text-green-400">
-                        ${(item.price * item.quantity).toFixed(2)}
+                        R{(item.price * item.quantity).toFixed(2)}
                       </span>
                     </div>
                   </div>
