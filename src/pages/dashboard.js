@@ -16,7 +16,6 @@ import { fetchOrders } from "../app/utils/orders"; // Import your fetchOrders ut
 import toast from "react-hot-toast";
 
 export default function Dashboard() {
-  const router = useRouter();
   const user = useUserStore((state) => state.user);
 
   // Product-related states

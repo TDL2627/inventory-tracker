@@ -1,5 +1,4 @@
 import { supabase } from "../lib/supabaseClient";
-import { useUserStore } from "../stores/user";
 
 export async function signUp(
   email,

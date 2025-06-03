@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Plus, Minus, ShoppingCart, Calculator, X, Search } from "lucide-react";
-import { fetchProducts,updateProduct } from "../app/utils/products";
+import { fetchProducts, updateProduct } from "../app/utils/products";
 import { useUserStore } from "../app/stores/user";
 import toast from "react-hot-toast";
 import { addOrder } from "@/app/utils/orders";
@@ -16,6 +16,8 @@ const TellerPage = () => {
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [cardFee, setCardFee] = useState(0);
+  const [cashGiven, setCashGiven] = useState(0);
+  const [changeDue, setChangeDue] = useState(0);
 
   const loadProducts = async () => {
     if (!user?.ownerEmail) return;
@@ -111,9 +113,11 @@ const TellerPage = () => {
       if (subtotal > 0 && subtotal <= 50) {
         setCardFee(3);
       } else if (subtotal > 50) {
-        // R3 base fee + R5 for each R100
-        const additionalFee = Math.floor(subtotal / 100) * 5;
-        setCardFee(additionalFee);
+        const hundreds = Math.floor(subtotal / 100);
+        const remainder = subtotal % 100;
+        const remainderFee = remainder > 50 ? 3 : 0;
+        const fee = hundreds * 5 + remainderFee;
+        setCardFee(fee);
       } else {
         setCardFee(0);
       }
@@ -126,7 +130,7 @@ const TellerPage = () => {
 
   const clearCart = () => {
     setCart([]);
-    setPaymentMethod("cash"); 
+    setPaymentMethod("cash");
   };
 
   const handleProcessPayment = () => {
@@ -138,6 +142,13 @@ const TellerPage = () => {
   };
 
   const handleConfirmCheckout = async () => {
+    if (paymentMethod === "cash") {
+      if (cashGiven < finalTotal) {
+        toast.error("Cash given is less than total amount");
+        return;
+      }
+      setChangeDue(cashGiven - finalTotal);
+    }
     const toastId = toast.loading("Processing transaction...");
 
     const updatePromises = cart.map((item) => {
@@ -155,39 +166,41 @@ const TellerPage = () => {
         );
       }
 
-     const orderItems = cart.map((item) => ({
-      productId: item.id,
-      name: item.name,
-      price: item.price,
-      quantity: item.quantity,
-    }));
+      const orderItems = cart.map((item) => ({
+        productId: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+      }));
 
-    const newOrder = {
-      totalAmount: finalTotal,
-      cardFee: cardFee,
-      paymentMethod: paymentMethod,
-      items: orderItems, 
-      teller: user.name,
-      ownerEmail: user.ownerEmail,
-    };
+      const newOrder = {
+        totalAmount: finalTotal,
+        cardFee: cardFee,
+        paymentMethod: paymentMethod,
+        items: orderItems,
+        teller: user.name,
+        ownerEmail: user.ownerEmail,
+      };
 
-    const { error: orderError } = await addOrder(newOrder);
+      const { error: orderError } = await addOrder(newOrder);
 
-    if (orderError) {
-      throw new Error(
-        orderError.message || "An unknown database error occurred during order creation."
-      );
-    }
+      if (orderError) {
+        throw new Error(
+          orderError.message ||
+            "An unknown database error occurred during order creation."
+        );
+      }
 
       toast.success("Payment Successful!", { id: toastId });
-
+      setCashGiven(0);
+      setChangeDue(0);
       setIsCheckoutModalOpen(false);
       clearCart();
-      await loadProducts(); 
+      await loadProducts();
     } catch (error) {
       toast.error(`Checkout failed: ${error.message}`, { id: toastId });
       await loadProducts();
-    } 
+    }
   };
 
   const CartComponent = () => (
@@ -279,7 +292,29 @@ const TellerPage = () => {
               <span className="text-orange-400">R{cardFee.toFixed(2)}</span>
             </div>
           )}
-
+          {paymentMethod === "cash" && (
+            <>
+              <div className="flex justify-between items-center mt-4">
+                <label htmlFor="cashGiven">Cash Given:</label>
+                <input
+                  type="number"
+                  id="cashGiven"
+                  className="bg-gray-700 px-3 py-1 rounded text-white w-28 text-right"
+                  value={cashGiven}
+                  onChange={(e) => setCashGiven(Number(e.target.value))}
+                  min={0}
+                />
+              </div>
+              {cashGiven > 0 && cashGiven >= finalTotal && (
+                <div className="flex justify-between font-semibold mt-2">
+                  <span>Change Due:</span>
+                  <span className="text-green-300 font-mono">
+                    R{(cashGiven - finalTotal).toFixed(2)}
+                  </span>
+                </div>
+              )}
+            </>
+          )}
           {/* Total */}
           <div className="flex justify-between text-xl font-bold my-4">
             <span>Total:</span>
