@@ -1,0 +1,4 @@
+id,orderDate,totalAmount,cardFee,paymentMethod,items,teller,ownerEmail
+aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa,2025-01-01T10:00:00Z,30.50,0.00,cash,"[{""productId"":1,""name"":""Cola"",""price"":12.5,""quantity"":2}]",Bob Teller,owner@example.com
+bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb,2025-01-02T12:00:00Z,120.00,5.00,card,"[{""productId"":2,""name"":""Bread"",""price"":18,""quantity"":4}]",Bob Teller,owner@example.com
+

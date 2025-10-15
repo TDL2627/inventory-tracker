@@ -9,6 +9,8 @@ export default function AuthPage() {
   const router = useRouter();
   const [activeModal, setActiveModal] = useState(null);
   const { setUser } = useUserStore();
+  const [isSigningUp, setIsSigningUp] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   useEffect(() => {
     if (router.isReady) {
@@ -35,40 +37,83 @@ export default function AuthPage() {
 
   const handleSignup = async () => {
     try {
+      setIsSigningUp(true);
+      // Normalize inputs
+      const normalizedEmail = (signupData.email || "").trim().toLowerCase();
+      const normalizedOwnerEmail = (signupData.ownerEmail || "").trim().toLowerCase();
+
+      // Basic email regex: very permissive but catches obvious errors
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      // Basic validation to avoid common 400s from Supabase
+      if (!normalizedEmail) {
+        toast.error("Email is required");
+        return;
+      }
+      if (!emailRegex.test(normalizedEmail)) {
+        toast.error("Please enter a valid email address");
+        return;
+      }
+      if (!signupData.password) {
+        toast.error("Password is required");
+        return;
+      }
+      if (signupData.password.length < 6) {
+        toast.error("Password must be at least 6 characters");
+        return;
+      }
       if (signupData.role === "teller") {
-        const owner = await getUserByEmail(signupData.ownerEmail);
+        if (!normalizedOwnerEmail || !emailRegex.test(normalizedOwnerEmail)) {
+          toast.error("Please enter a valid owner's email");
+          return;
+        }
+        if (normalizedOwnerEmail === normalizedEmail) {
+          toast.error("Teller email cannot be the same as owner's email");
+          return;
+        }
+        const owner = await getUserByEmail(normalizedOwnerEmail);
         if (!owner) {
           toast.error("Owner not found. Please check the email.");
           return; // Stop execution if no owner found
         }
+        if (owner.role !== "owner") {
+          toast.error("Provided email does not belong to an Owner account");
+          return;
+        }
       }
       await signUp(
-        signupData.email,
+        normalizedEmail,
         signupData.password,
         signupData.role,
         signupData.name,
-        signupData.ownerEmail
+        normalizedOwnerEmail
       );
       setUser(signupData);
       toast.success("Signed up! 🎉");
+      await router.push(signupData.role === "teller" ? "/tellers" : "/dashboard");
       closeModal();
-      router.push(signupData.role === "teller" ? "/tellers" : "/dashboard");
     } catch (err) {
-      toast.error("Signup failed");
+      // eslint-disable-next-line no-console
+      console.error('Signup flow failed', err);
+      toast.error(err?.message || "Signup failed");
+    } finally {
+      setIsSigningUp(false);
     }
   };
   const handleLogin = async () => {
     try {
+      setIsLoggingIn(true);
       await signIn(loginData.email, loginData.password);
       const user = await getUser();
       setUser(user);
 
       toast.success("Logged in! 👏");
-      router.push(user.role === "teller" ? "/tellers" : "/dashboard");
-
+      await router.push(user.role === "teller" ? "/tellers" : "/dashboard");
       closeModal();
     } catch (err) {
       toast.error(err.message || "Login failed");
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
@@ -197,9 +242,13 @@ export default function AuthPage() {
               </button>
               <button
                 onClick={handleSignup}
-                className="px-4 py-2 cursor-pointer bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700"
+                disabled={isSigningUp}
+                className={`px-4 py-2 cursor-pointer bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2`}
               >
-                Create Account
+                {isSigningUp && (
+                  <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                )}
+                {isSigningUp ? "Creating..." : "Create Account"}
               </button>
             </div>
           </div>
@@ -246,9 +295,13 @@ export default function AuthPage() {
               </button>
               <button
                 onClick={handleLogin}
-                className="px-4 py-2 cursor-pointer bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700"
+                disabled={isLoggingIn}
+                className={`px-4 py-2 cursor-pointer bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2`}
               >
-                Log In
+                {isLoggingIn && (
+                  <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                )}
+                {isLoggingIn ? "Logging in..." : "Log In"}
               </button>
             </div>
           </div>

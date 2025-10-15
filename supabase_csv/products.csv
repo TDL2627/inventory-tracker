@@ -1,0 +1,4 @@
+id,name,category,price,quantity,image_url,ownerEmail
+1,Cola,Drinks,12.50,24,https://example.com/cola.png,owner@example.com
+2,Bread,Food,18.00,10,https://example.com/bread.png,owner@example.com
+

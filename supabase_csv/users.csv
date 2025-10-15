@@ -1,0 +1,4 @@
+id,email,name,role,ownerEmail
+00000000-0000-0000-0000-000000000000,owner@example.com,Alice Owner,owner,
+11111111-1111-1111-1111-111111111111,teller@example.com,Bob Teller,teller,owner@example.com
+

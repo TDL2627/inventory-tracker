@@ -7,15 +7,29 @@ export async function signUp(
   name = "",
   ownerEmail = ""
 ) {
-  const { data, error } = await supabase.auth.signUp({ email, password });
-  if (error) throw error;
+  const normalizedEmail = (email || "").trim().toLowerCase();
+  const { data, error } = await supabase.auth.signUp({ email: normalizedEmail, password });
+  if (error) {
+    // eslint-disable-next-line no-console
+    console.error("Supabase signUp error", { error });
+    throw new Error(`Supabase signUp failed: ${error.message}`);
+  }
 
   const userId = data.user?.id;
 
   if (userId) {
-    await supabase
+    const { error: insertError } = await supabase
       .from("users")
-      .insert([{ role, name, email, id: userId, ownerEmail }]);
+      .insert([{ role, name, email: normalizedEmail, id: userId, ownerEmail }]);
+    if (insertError) {
+      // eslint-disable-next-line no-console
+      console.error("Insert into users failed", { insertError, payload: { role, name, email, id: userId, ownerEmail } });
+      throw new Error(`Insert profile failed: ${insertError.message}`);
+    }
+  } else {
+    // eslint-disable-next-line no-console
+    console.error("No user id returned from signUp", { data });
+    throw new Error("Sign up did not return a user id");
   }
 
   return data;
