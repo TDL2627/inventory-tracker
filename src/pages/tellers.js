@@ -237,7 +237,7 @@ const TellerPage = () => {
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => updateQuantity(item.id, -1)}
-                    className="bg-gray-600 hover:bg-gray-500 rounded p-1"
+                    className="bg-gray-600 hover:bg-black rounded p-1"
                   >
                     <Minus className="w-4 h-4" />
                   </button>
@@ -246,7 +246,7 @@ const TellerPage = () => {
                   </span>
                   <button
                     onClick={() => updateQuantity(item.id, 1)}
-                    className="bg-gray-600 hover:bg-gray-500 rounded p-1"
+                    className="bg-gray-600 hover:bg-black rounded p-1"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
@@ -375,7 +375,7 @@ const TellerPage = () => {
         <div className="flex justify-end gap-4 mt-8">
           <button
             onClick={() => setIsCheckoutModalOpen(false)}
-            className=" cursor-pointer px-6 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg font-medium"
+            className=" cursor-pointer px-6 py-2 bg-gray-600 hover:bg-black rounded-lg font-medium"
           >
             Cancel
           </button>
@@ -391,7 +391,7 @@ const TellerPage = () => {
   );
 
   return (
-    <div className="h-full bg-gray-900 text-white mt-10">
+    <div className="h-full bg-black text-white mt-10">
       <div className="container mx-auto px-4 py-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -410,7 +410,7 @@ const TellerPage = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Products Section */}
-          <div className="lg:col-span-2 bg-gray-800 rounded-xl p-6">
+          <div className="lg:col-span-2 bg-black rounded-xl p-6">
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
               {/* Search */}
               <div className="relative flex-1">
@@ -418,7 +418,7 @@ const TellerPage = () => {
                 <input
                   type="text"
                   placeholder="Search products..."
-                  className="w-full bg-gray-700 border border-gray-600 rounded-lg pl-10 pr-4 py-2 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full bg-gray-800 border border-gray-700 rounded-lg pl-10 pr-4 py-2 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -426,7 +426,7 @@ const TellerPage = () => {
 
               {/* Category Filter */}
               <select
-                className="bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
               >
@@ -443,7 +443,7 @@ const TellerPage = () => {
               {paginatedProducts.map((product) => (
                 <div
                   key={product.id} // Assuming each product has a unique ID
-                  className="bg-gray-700 rounded-lg shadow-lg overflow-hidden flex flex-col transform transition-transform duration-200 hover:scale-105 "
+                  className="bg-gray-800 rounded-lg shadow-lg overflow-hidden flex flex-col transform transition-transform duration-200 hover:scale-105 "
                 >
                   <div className="p-4 flex-grow flex flex-col w-full">
                     <div className="flex items-center justify-between mb-2">
@@ -451,7 +451,7 @@ const TellerPage = () => {
                         {product.name}
                       </h3>
                       {product.image_url && (
-                        <div className="relative w-full h-10 mt-5 bg-gray-700 flex items-center justify-end">
+                        <div className="relative w-full h-10 mt-5 bg-gray-800 flex items-center justify-end">
                           <img
                             src={product.image_url}
                             alt={product.name}
@@ -481,7 +481,7 @@ const TellerPage = () => {
                     </div>
 
                     <div className="flex items-center justify-between mt-auto pt-2">
-                      <span className="text-2xl font-bold text-white">
+            <span className="text-2xl font-bold text-white">
                         R{product.price.toFixed(2)}
                       </span>
                       <button
@@ -493,7 +493,7 @@ const TellerPage = () => {
                             toast.error("Out of stock");
                           }
                         }}
-                        className="bg-blue-600 cursor-pointer disabled:cursor-not-allowed hover:bg-blue-700 text-white font-bold h-10 py-2 px-4 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+              className="bg-red-600 cursor-pointer disabled:cursor-not-allowed hover:bg-red-700 text-white font-bold h-10 py-2 px-4 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
                       >
                         Add to Cart
                       </button>
@@ -526,7 +526,7 @@ const TellerPage = () => {
           </div>
 
           {/* Cart & Calculations - Desktop */}
-          <div className="hidden lg:block bg-gray-800 rounded-xl p-6">
+          <div className="hidden lg:block bg-black rounded-xl p-6">
             <CartComponent />
           </div>
         </div>
@@ -534,7 +534,7 @@ const TellerPage = () => {
         {/* Cart Modal for Mobile */}
         {isCartModalOpen && (
           <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40 flex justify-center items-start pt-10">
-            <div className="bg-gray-800 rounded-lg shadow-xl w-11/12 max-w-lg p-6 relative">
+            <div className="bg-black rounded-lg shadow-xl w-11/12 max-w-lg p-6 relative">
               <button
                 onClick={() => setIsCartModalOpen(false)}
                 className="absolute top-4 right-4 text-gray-400 hover:text-white"

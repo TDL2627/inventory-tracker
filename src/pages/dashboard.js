@@ -162,11 +162,11 @@ export default function Dashboard() {
   const loading = loadingProducts || loadingOrders; // Combined loading state for overall dashboard
 
   return (
-    <div className="flex h-full bg-gray-900 text-gray-100 ">
+    <div className="flex h-full bg-black text-gray-100 ">
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Dashboard Content */}
-        <main className="flex-1 overflow-y-auto bg-gray-900 p-6">
+        <main className="flex-1 overflow-y-auto bg-black p-6">
           {/* Welcome & Date */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
             <div>
@@ -178,7 +178,7 @@ export default function Dashboard() {
               </p>
             </div>
             <div className="mt-4 md:mt-0">
-              <div className="bg-gray-800 rounded-md px-4 py-2 text-sm font-medium text-gray-300">
+              <div className="bg-black rounded-md px-4 py-2 text-sm font-medium text-gray-300">
                 {new Date().toLocaleDateString("en-US", {
                   weekday: "long",
                   year: "numeric",
@@ -192,12 +192,12 @@ export default function Dashboard() {
           {/* Stat Cards - Sales Section */}
           <h2 className="text-xl font-bold text-white mb-4">Sales</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <div className="bg-black rounded-lg p-6 border border-gray-800">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-medium text-gray-300">
                   Total Sales Amount
                 </h2>
-                <div className="bg-indigo-600/20 text-indigo-400 p-2 rounded-md">
+                <div className="bg-red-600/20 text-red-400 p-2 rounded-md">
                   <ShoppingCart className="h-5 w-5" />
                 </div>
               </div>
@@ -205,7 +205,7 @@ export default function Dashboard() {
                 <div>
                   <span className="text-3xl font-bold text-white">
                     {loadingOrders ? (
-                      <div className="animate-pulse bg-gray-700 h-8 w-24 rounded"></div>
+                      <div className="animate-pulse bg-gray-800 h-8 w-24 rounded"></div>
                     ) : (
                       new Intl.NumberFormat("en-ZA", {
                         style: "currency",
@@ -217,7 +217,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <div className="bg-black rounded-lg p-6 border border-gray-800">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-medium text-gray-300">
                   Sales Today
@@ -230,7 +230,7 @@ export default function Dashboard() {
                 <div>
                   <span className="text-3xl font-bold text-white">
                     {loadingOrders ? (
-                      <div className="animate-pulse bg-gray-700 h-8 w-24 rounded"></div>
+                      <div className="animate-pulse bg-gray-800 h-8 w-24 rounded"></div>
                     ) : (
                       new Intl.NumberFormat("en-ZA", {
                         style: "currency",
@@ -242,7 +242,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <div className="bg-black rounded-lg p-6 border border-gray-800">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-medium text-gray-300">
                   Total Orders
@@ -255,7 +255,7 @@ export default function Dashboard() {
                 <div>
                   <span className="text-3xl font-bold text-white">
                     {loadingOrders ? (
-                      <div className="animate-pulse bg-gray-700 h-8 w-12 rounded"></div>
+                      <div className="animate-pulse bg-gray-800 h-8 w-12 rounded"></div>
                     ) : (
                       totalOrdersCount
                     )}
@@ -264,7 +264,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <div className="bg-black rounded-lg p-6 border border-gray-800">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-medium text-gray-300">
                   Orders Today
@@ -277,7 +277,7 @@ export default function Dashboard() {
                 <div>
                   <span className="text-3xl font-bold text-white">
                     {loadingOrders ? (
-                      <div className="animate-pulse bg-gray-700 h-8 w-12 rounded"></div>
+                      <div className="animate-pulse bg-gray-800 h-8 w-12 rounded"></div>
                     ) : (
                       dailyOrdersCount
                     )}
@@ -291,7 +291,7 @@ export default function Dashboard() {
           {/* Stat Cards - Inventory Section */}
           <h2 className="text-xl font-bold text-white mb-4">Inventory</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <div className="bg-black rounded-lg p-6 border border-gray-800">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-medium text-gray-300">
                   Total Products
@@ -304,7 +304,7 @@ export default function Dashboard() {
                 <div>
                   <span className="text-3xl font-bold text-white">
                     {loadingProducts ? (
-                      <div className="animate-pulse bg-gray-700 h-8 w-12 rounded"></div>
+                      <div className="animate-pulse bg-gray-800 h-8 w-12 rounded"></div>
                     ) : (
                       products?.length || 0
                     )}
@@ -313,7 +313,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <div className="bg-black rounded-lg p-6 border border-gray-800">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-medium text-gray-300">
                   Total Stock Value
@@ -326,7 +326,7 @@ export default function Dashboard() {
                 <div>
                   <span className="text-3xl font-bold text-white">
                     {loadingProducts ? (
-                      <div className="animate-pulse bg-gray-700 h-8 w-24 rounded"></div>
+                      <div className="animate-pulse bg-gray-800 h-8 w-24 rounded"></div>
                     ) : (
                       new Intl.NumberFormat("en-ZA", {
                         style: "currency",
@@ -338,7 +338,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <div className="bg-black rounded-lg p-6 border border-gray-800">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-medium text-gray-300">
                   Low Stock Items
@@ -351,7 +351,7 @@ export default function Dashboard() {
                 <div>
                   <span className="text-3xl font-bold text-white">
                     {loadingProducts ? (
-                      <div className="animate-pulse bg-gray-700 h-8 w-12 rounded"></div>
+                      <div className="animate-pulse bg-gray-800 h-8 w-12 rounded"></div>
                     ) : (
                       lowStockCount
                     )}
@@ -360,7 +360,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <div className="bg-black rounded-lg p-6 border border-gray-800">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-medium text-gray-300">
                   Out of Stock
@@ -373,7 +373,7 @@ export default function Dashboard() {
                 <div>
                   <span className="text-3xl font-bold text-white">
                     {loadingProducts ? (
-                      <div className="animate-pulse bg-gray-700 h-8 w-12 rounded"></div>
+                      <div className="animate-pulse bg-gray-800 h-8 w-12 rounded"></div>
                     ) : (
                       noStockCount
                     )}

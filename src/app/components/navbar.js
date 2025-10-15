@@ -34,12 +34,12 @@ const Sidebar = () => {
 
   if (isHome) {
     return (
-      <header className="bg-gray-900 text-white flex items-center justify-between lg:px-10 px-4 h-16 fixed w-full z-20">
+      <header className="bg-black text-white flex items-center justify-between lg:px-10 px-4 h-16 fixed w-full z-20">
         <div
           onClick={() => router.push(user ? "/dashboard" : "/")}
           className="flex items-center cursor-pointer"
         >
-          <PackageCheck className="h-8 w-8 text-indigo-500" />
+          <PackageCheck className="h-8 w-8 text-red-500" />
           <span className="ml-2 text-xl font-bold">InStock</span>
         </div>
 
@@ -52,8 +52,8 @@ const Sidebar = () => {
               Sign In
             </button>
             <button
-              onClick={() => router.push("/auth")}
-              className="bg-indigo-600 px-3 py-1 rounded hover:bg-indigo-500  cursor-pointer"
+              onClick={() => router.push("/auth?modal=signup")}
+              className="bg-red-600 px-3 py-1 rounded hover:bg-red-500  cursor-pointer"
             >
               Get Started
             </button>
@@ -67,9 +67,9 @@ const Sidebar = () => {
   }
   if (user?.role === "teller") {
     return (
-      <header className="bg-gray-900 text-white flex items-center justify-between px-4 h-16 fixed w-full z-20">
+      <header className="bg-black text-white flex items-center justify-between px-4 h-16 fixed w-full z-20">
         <div className="flex items-center cursor-pointer">
-          <PackageCheck className="h-8 w-8 text-indigo-500" />
+          <PackageCheck className="h-8 w-8 text-red-500" />
           <span className="ml-2 text-xl font-bold">InStock</span>
         </div>
 
@@ -90,12 +90,12 @@ const Sidebar = () => {
   // Sidebar for other pages with active state
   return (
     <>
-      <div className="lg:hidden p-4 bg-gray-900 flex justify-between items-center">
+      <div className="lg:hidden p-4 bg-black flex justify-between items-center">
         <div
           onClick={() => router.push(user ? "/dashboard" : "/")}
           className="flex items-center cursor-pointer text-white"
         >
-          <PackageCheck className="h-8 w-8 text-indigo-500" />
+          <PackageCheck className="h-8 w-8 text-red-500" />
           <span className="ml-2 text-xl font-bold">InStock</span>
         </div>
         <button
@@ -116,7 +116,7 @@ const Sidebar = () => {
 
       {/* Sidebar itself */}
       <div
-        className={`fixed inset-y-0 right-0 z-30 w-64 transform bg-gray-800 transition duration-300 ease-in-out
+        className={`fixed inset-y-0 right-0 z-30 w-64 transform bg-black transition duration-300 ease-in-out
         lg:static lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "translate-x-full"
         }`}
@@ -127,7 +127,7 @@ const Sidebar = () => {
             className="flex items-center cursor-pointer"
             onClick={() => router.push(user ? "/dashboard" : "/")}
           >
-            <PackageCheck className="h-8 w-8 text-indigo-500" />
+            <PackageCheck className="h-8 w-8 text-red-500" />
             <span className="ml-2 text-xl font-bold text-white">InStock</span>
           </div>
           <button
@@ -152,8 +152,8 @@ const Sidebar = () => {
                     href="/dashboard"
                     className={`flex items-center px-4 py-2 rounded-md ${
                       isActive("/dashboard")
-                        ? "bg-gray-700 text-gray-100"
-                        : "text-gray-400 hover:text-gray-100 hover:bg-gray-700"
+                        ? "bg-gray-800 text-gray-100"
+                        : "text-gray-400 hover:text-gray-100 hover:bg-gray-800"
                     }`}
                     onClick={() => setSidebarOpen(false)}
                   >
@@ -165,8 +165,8 @@ const Sidebar = () => {
                     href="/products"
                     className={`flex items-center px-4 py-2 rounded-md ${
                       isActive("/products")
-                        ? "bg-gray-700 text-gray-100"
-                        : "text-gray-400 hover:text-gray-100 hover:bg-gray-700"
+                        ? "bg-gray-800 text-gray-100"
+                        : "text-gray-400 hover:text-gray-100 hover:bg-gray-800"
                     }`}
                     onClick={() => setSidebarOpen(false)}
                   >
@@ -178,7 +178,7 @@ const Sidebar = () => {
                   <Link
                     href="/sales"
                     onClick={() => setSidebarOpen(false)}
-                    className="flex items-center px-4 py-2 text-gray-400 hover:text-gray-100 hover:bg-gray-700 rounded-md"
+                    className="flex items-center px-4 py-2 text-gray-400 hover:text-gray-100 hover:bg-gray-800 rounded-md"
                   >
                     <ShoppingCart className="w-5 h-5 mr-3" />
                     Sales
@@ -190,7 +190,7 @@ const Sidebar = () => {
                       toast.success("Logged out successfully");
                       router.push(`/`);
                     }}
-                    className="flex items-center px-4 py-2 text-gray-400 hover:text-gray-100 hover:bg-gray-700 rounded-md w-full cursor-pointer"
+                    className="flex items-center px-4 py-2 text-gray-400 hover:text-gray-100 hover:bg-gray-800 rounded-md w-full cursor-pointer"
                   >
                     <LogOut className="w-5 h-5 mr-3" />
                     Log Out
@@ -200,13 +200,13 @@ const Sidebar = () => {
                 <>
                   <button
                     onClick={() => goToAuthWithModal("login")}
-                    className="w-full text-left px-4 py-2  text-gray-400 hover:text-gray-100 hover:bg-gray-700 rounded-md"
+                    className="w-full text-left px-4 py-2  text-gray-400 hover:text-gray-100 hover:bg-gray-800 rounded-md"
                   >
                     Sign In
                   </button>
                   <button
                     onClick={() => goToAuthWithModal("signup")}
-                    className="w-full text-left px-4 py-2 text-white bg-indigo-600 hover:bg-indigo-500 rounded-md"
+                    className="w-full text-left px-4 py-2 text-white bg-red-600 hover:bg-red-500 rounded-md"
                   >
                     Get Started
                   </button>

@@ -118,8 +118,8 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-950 text-white px-4">
-      <h2 className="text-4xl font-bold mb-2 text-indigo-400">InStock</h2>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white px-4">
+      <h2 className="text-4xl font-bold mb-2 text-red-400">InStock</h2>
       <p className="text-gray-400 text-center mb-8 max-w-md">
         Manage your stock, sales, and team. Owners can create stores. Tellers
         can help with daily sales and stock tracking.
@@ -128,7 +128,7 @@ export default function AuthPage() {
       <div className="flex gap-4">
         <button
           onClick={() => setActiveModal("signup")}
-          className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-md text-sm font-medium cursor-pointer"
+          className="px-5 py-2 bg-red-600 hover:bg-red-700 rounded-md text-sm font-medium cursor-pointer"
         >
           Sign Up
         </button>
@@ -141,14 +141,14 @@ export default function AuthPage() {
       </div>
       {activeModal === "login" && (
         <div className="flex items-center justify-center gap-4 cursor-pointer md:right-[45%]  fixed top-20 md:top-40  z-60">
-          <PackageCheck className="h-8 w-8 text-indigo-500" />
+          <PackageCheck className="h-8 w-8 text-red-500" />
           <h1 className="text-4xl font-bold text-white">InStock</h1>
         </div>
       )}
       {/* Signup Modal */}
       {activeModal === "signup" && (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-40 p-4">
-          <div className="bg-gray-900 rounded-lg shadow-xl max-w-md w-full border border-gray-800">
+          <div className="bg-black rounded-lg shadow-xl max-w-md w-full border border-gray-800">
             <div className="px-6 py-4 border-b border-gray-700">
               <h3 className="text-lg font-semibold text-white">
                 Create Your InStock Account
@@ -187,7 +187,7 @@ export default function AuthPage() {
                 <button
                   className={`flex items-center gap-2 p-2 rounded border cursor-pointer ${
                     signupData.role === "owner"
-                      ? "bg-indigo-700 border-indigo-500"
+                      ? "bg-red-700 border-red-500"
                       : "bg-gray-800 border-gray-700"
                   }`}
                   onClick={() =>
@@ -200,7 +200,7 @@ export default function AuthPage() {
                 <button
                   className={`flex items-center gap-2 p-2 rounded border cursor-pointer ${
                     signupData.role === "teller"
-                      ? "bg-blue-700 border-blue-500"
+                      ? "bg-red-700 border-red-500"
                       : "bg-gray-800 border-gray-700"
                   }`}
                   onClick={() =>
@@ -235,7 +235,7 @@ export default function AuthPage() {
                 Already have an account?{" "}
                 <button
                   onClick={() => setActiveModal("login")}
-                  className="text-indigo-400 hover:text-indigo-300 underline cursor-pointer"
+                  className="text-red-400 hover:text-red-300 underline cursor-pointer"
                 >
                   Log in
                 </button>
@@ -252,7 +252,7 @@ export default function AuthPage() {
               <button
                 onClick={handleSignup}
                 disabled={isSigningUp}
-                className={`px-4 py-2 cursor-pointer bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2`}
+                className={`px-4 py-2 cursor-pointer bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2`}
               >
                 {isSigningUp && (
                   <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
@@ -267,7 +267,7 @@ export default function AuthPage() {
       {/* Login Modal */}
       {activeModal === "login" && (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-40 p-4">
-          <div className="bg-gray-900 rounded-lg shadow-xl max-w-md w-full border border-gray-800">
+          <div className="bg-black rounded-lg shadow-xl max-w-md w-full border border-gray-800">
             <div className="px-6 py-4 border-b border-gray-700">
               <h3 className="text-lg font-semibold text-white">
                 Log in to your Account
@@ -297,7 +297,7 @@ export default function AuthPage() {
                 Don't have an account?{" "}
                 <button
                   onClick={() => setActiveModal("signup")}
-                  className="text-indigo-400 hover:text-indigo-300 underline cursor-pointer"
+                  className="text-red-400 hover:text-red-300 underline cursor-pointer"
                 >
                   Sign up
                 </button>
@@ -314,7 +314,7 @@ export default function AuthPage() {
               <button
                 onClick={handleLogin}
                 disabled={isLoggingIn}
-                className={`px-4 py-2 cursor-pointer bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2`}
+                className={`px-4 py-2 cursor-pointer bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2`}
               >
                 {isLoggingIn && (
                   <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>

@@ -95,7 +95,7 @@ const SalesPage = () => {
   const todayOrders = orders.filter((order) => isToday(new Date(order.orderDate))).length;
 
   return (
-    <div className="h-full bg-gray-900 text-white ">
+    <div className="h-full bg-black text-white ">
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-3">
@@ -109,7 +109,7 @@ const SalesPage = () => {
                 setFilterRange(e.target.value);
                 setFilterDate(""); // Clear specific date when a range is chosen
               }}
-              className="bg-gray-700 text-white rounded-lg p-2"
+              className="bg-gray-800 text-white rounded-lg p-2"
             >
               <option value="today">Today</option>
               <option value="last7Days">Last 7 Days</option>
@@ -124,27 +124,27 @@ const SalesPage = () => {
           <div className="bg-gray-800 rounded-xl p-6 shadow-lg flex items-center space-x-4">
             <div>
               <p className="text-gray-400 text-sm">Total Sales</p>
-              <h2 className="text-2xl font-bold">R{totalSales.toFixed(2)}</h2>
+              <h2 className="text-2xl font-bold text-red-400">R{totalSales.toFixed(2)}</h2>
             </div>
           </div>
           <div className="bg-gray-800 rounded-xl p-6 shadow-lg flex items-center space-x-4">
             <ListOrdered className="w-10 h-10 text-blue-400" />
             <div>
               <p className="text-gray-400 text-sm">Total Orders </p>
-              <h2 className="text-2xl font-bold">{totalOrders}</h2>
+              <h2 className="text-2xl font-bold text-red-400">{totalOrders}</h2>
             </div>
           </div>
           <div className="bg-gray-800 rounded-xl p-6 shadow-lg flex items-center space-x-4">
-            <CalendarDays className="w-10 h-10 text-purple-400" />
+            <CalendarDays className="w-10 h-10 text-red-400" />
             <div>
               <p className="text-gray-400 text-sm">Today's Orders</p>
-              <h2 className="text-2xl font-bold">{todayOrders}</h2>
+              <h2 className="text-2xl font-bold text-red-400">{todayOrders}</h2>
             </div>
           </div>
         </div>
 
         {/* Orders List */}
-        <div className="bg-gray-800 rounded-xl p-6">
+        <div className="bg-black rounded-xl p-6">
           <h2 className="text-2xl font-bold mb-6">Recent Orders</h2>
 
           {loading ? (
@@ -157,7 +157,7 @@ const SalesPage = () => {
             </p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-700">
+              <table className="min-w-full divide-y divide-gray-800">
                 <thead className="bg-gray-700">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider rounded-tl-lg">
@@ -177,11 +177,11 @@ const SalesPage = () => {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-700">
+                <tbody className="divide-y divide-gray-800">
                   {filteredOrders.map((order) => (
                     <tr
                       key={order.id}
-                      className="hover:bg-gray-700 transition-colors"
+                      className="hover:bg-gray-800 transition-colors"
                     >
                       <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-300">
                         {order.id.substring(0, 8)}...
