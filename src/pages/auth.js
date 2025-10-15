@@ -230,7 +230,16 @@ export default function AuthPage() {
               </div>
             </div>
 
-            <div className="px-6 py-3 bg-gray-800 flex justify-end space-x-3 rounded-b-lg">
+            <div className="px-6 py-3 bg-gray-800 flex justify-between items-center space-x-3 rounded-b-lg">
+              <div className="text-sm text-gray-400">
+                Already have an account?{" "}
+                <button
+                  onClick={() => setActiveModal("login")}
+                  className="text-indigo-400 hover:text-indigo-300 underline cursor-pointer"
+                >
+                  Log in
+                </button>
+              </div>
               <button
                 onClick={() => {
                   closeModal;
@@ -283,7 +292,16 @@ export default function AuthPage() {
               />
             </div>
 
-            <div className="px-6 py-3 bg-gray-800 flex justify-end space-x-3 rounded-b-lg">
+            <div className="px-6 py-3 bg-gray-800 flex justify-between items-center space-x-3 rounded-b-lg">
+              <div className="text-sm text-gray-400">
+                Don't have an account?{" "}
+                <button
+                  onClick={() => setActiveModal("signup")}
+                  className="text-indigo-400 hover:text-indigo-300 underline cursor-pointer"
+                >
+                  Sign up
+                </button>
+              </div>
               <button
                 onClick={() => {
                   closeModal;
